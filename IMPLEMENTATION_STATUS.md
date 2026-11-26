@@ -1,7 +1,7 @@
 # SHALTER + SOCIAL — статус объединения
 
 Дата аудита: 2026-11-26  
-Ветка: `feature/shalter-full-integration`
+Ветка: `feature/full-shalter-migration`
 
 ## Архитектура
 
