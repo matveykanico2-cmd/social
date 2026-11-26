@@ -228,9 +228,11 @@ function ProfileContent() {
       )}
 
       {/* Desktop header */}
-      <section className="mb-11 hidden items-start md:flex">
-        <div className="flex w-[290px] shrink-0 justify-center pr-7">{avatar(150)}</div>
-        <div className="min-w-0 flex-1">
+      <section className="vk-card mb-6 hidden overflow-hidden md:block">
+        <div className="h-[150px] bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.4),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)]" />
+        <div className="flex items-start px-7 pb-7">
+          <div className="-mt-20 flex w-[220px] shrink-0 justify-center pr-7">{avatar(150)}</div>
+          <div className="min-w-0 flex-1 pt-5">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="mr-3 flex items-center text-xl">
               {p.username}
@@ -262,6 +264,7 @@ function ProfileContent() {
               </a>
             )}
             <FollowedBy profile={p} onOpen={() => setList("mutual")} />
+          </div>
           </div>
         </div>
       </section>
