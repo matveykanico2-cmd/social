@@ -6,7 +6,7 @@
 
 | Донорский модуль | Целевой модуль | Frontend | Backend/БД | Тесты | Результат и ограничения |
 |---|---|---|---|---|---|
-| auth, sessions, profiles, users | `src/app/(auth)`, `src/lib/server/auth.ts`, `/api/auth/totp` | partial | Единая SQLite-модель, HTTP-only cookie, TOTP/2FA setup и login challenge | build + 73 tests | OAuth и passkeys не перенесены |
+| auth, sessions, profiles, users | `src/app/(auth)`, `src/lib/server/auth.ts`, `/api/auth/totp` | partial | Единая SQLite-модель, HTTP-only cookie, encrypted TOTP/2FA setup, replay protection и login challenge | build + 76 tests | OAuth и passkeys не перенесены |
 | chats, folders, messages | `src/components/direct.tsx` | partial | partial | build + server tests | ЛС, группы, каналы, реакции, ответы, документы/аудио, voice, video circles, read/last-seen, typing, archive и role-protected invites работают; WebSocket и полноценные realtime events остаются |
 | calls, realtime | `call-overlay.tsx`, calls API | partial | partial | build | WebRTC signaling и аудио/видео UI есть; групповые звонки, TURN и reconnect требуют инфраструктуры |
 | channels | channels page/API | partial | partial | build | Аватары, обсуждения, роли и публикации есть; invite links и расширенная аналитика отсутствуют |
@@ -24,4 +24,4 @@ Marketplace реализован как единая Social-модель объ�
 
 ## Текущая проверка
 
-`npm run check` проходит: ESLint, TypeScript, 73 Vitest-теста и production build с 70 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.
+`npm run check` проходит: ESLint, TypeScript, 76 Vitest-тестов и production build с 70 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.

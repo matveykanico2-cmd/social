@@ -4,7 +4,7 @@
 
 | Раздел | Реализовано | Ограничения | Код / проверка |
 |---|---|---|---|
-| Accounts and login | email/phone signup, sessions, recovery, password, multi-account, language, theme, TOTP/2FA setup and login challenge | passkeys, OAuth, age policy | `src/app/(auth)`, `/api/auth/totp`; build + 71 tests |
+| Accounts and login | email/phone signup, sessions, recovery, password, multi-account, language, theme, encrypted TOTP/2FA setup and replay-protected login challenge | passkeys, OAuth, age policy | `src/app/(auth)`, `/api/auth/totp`; build + 76 tests |
 | Profiles | avatar, cover, username, bio, links, tabs, follow, friend request, message, gifts, highlights | QR, full business contacts, pinned posts | `src/app/(main)/[username]`; build |
 | Feed and Explore | feed, explore, search, saves, likes, recommendations | full ranking, trends, hashtags, places | `/api/feed`, `/api/explore`, `/api/search`; build |
 | Posts | photo/video carousel, captions, location, edit/delete, share, comments, replies, attachments, reactions | crop/filter editor, mentions/hashtags parsing, drafts/scheduling/collabs | `/api/posts`, `PostView`; build + 66 tests |
@@ -17,9 +17,9 @@
 | Live | rooms, viewers, route/UI | RTMP, recording, guests, realtime moderation | `/api/live`; build |
 | Professional tools | business flag/category, admin panel, server stats | creator analytics dashboard, scheduler, ads cabinet | admin/settings; build |
 | Commerce | Marketplace listings, image, categories, search, seller chat, admin removal, gifts | payments, orders, anti-fraud, payouts | `/marketplace`, `/api/marketplace`; build |
-| Security/moderation | HTTP-only sessions, ownership checks, blocks, reports, admin roles, MIME/size limits, file signature checks, write/auth rate limits, Origin checks, security headers, TOTP, audit entries for login/2FA | passkeys, OAuth, AV quarantine, full admin audit viewer | auth/admin/media/security/totp; build + 73 tests |
+| Security/moderation | HTTP-only sessions, ownership checks, blocks, reports, admin roles, MIME/size limits, file signature checks, write/auth rate limits, Origin checks, security headers, encrypted TOTP, audit entries and admin audit viewer | passkeys, OAuth, AV quarantine | auth/admin/media/security/totp; build + 76 tests |
 | UX/mobile | responsive nav, themes, avatar fallback, loading/error boundaries, PWA manifest, Russian default | Playwright viewport matrix, native Android/Desktop, offline queue | CSS/nav/PWA; production build |
 
 ## Verification
 
-`npm run check` is the required gate: ESLint, TypeScript, Vitest and production build. Current code passes 66 tests and builds 66 routes. Infrastructure-dependent items remain explicitly marked instead of being represented by mock buttons.
+`npm run check` is the required gate: ESLint, TypeScript, Vitest and production build. Current code passes 76 tests and builds 70 routes. Infrastructure-dependent items remain explicitly marked instead of being represented by mock buttons.

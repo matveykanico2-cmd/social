@@ -65,7 +65,7 @@ Social остаётся единым Next.js App Router приложением �
 
 ## Проверки текущего состояния
 
-Команда `npm run check` проходит: ESLint, TypeScript, 73 теста Vitest и production build с 70 маршрутами. Основные маршруты Social проверяются HTTP smoke-тестами. Секреты, локальная SQLite-база и uploads исключены из Git.
+Команда `npm run check` проходит: ESLint, TypeScript, 76 тестов Vitest и production build с 70 маршрутами. Основные маршруты Social проверяются HTTP smoke-тестами. Секреты, локальная SQLite-база и uploads исключены из Git.
 
 ## Правила публикации
 

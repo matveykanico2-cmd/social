@@ -6,7 +6,7 @@
 
 - ESLint.
 - TypeScript (`npx tsc --noEmit`).
-- 73 теста Vitest в 11 файлах.
+- 76 тестов Vitest в 14 файлах.
 - `next build`.
 - 70 маршрутов Next.js собраны.
 - Рабочее дерево после коммита проверяется через `git diff --check`.
