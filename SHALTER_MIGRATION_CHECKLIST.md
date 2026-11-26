@@ -15,7 +15,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 | auth, sessions, profiles, users, usernames | `src/lib/server/auth.ts`, `src/app/api/auth/*`, `src/app/api/users/*` | partial | Unified cookie sessions, password recovery, multi-account and profiles work; donor OAuth/passkeys/2FA remain. |
 | background | — | todo | Requires worker process and job ownership model. |
 | bootstrap, common, db | `src/lib/server/db.ts`, `db/schema.sql`, `db/migrate.mjs` | partial | Safe SQLite migrations exist; donor PostgreSQL/worker-specific adapters remain. |
-| bots | `src/app/api/bots/*`, `src/app/(main)/bots` | partial | Bot CRUD, commands and webhook work; full donor Bot API/Mini Apps remain. |
+| bots | `src/app/api/bots/*`, `src/app/(main)/bots` | partial | Bot CRUD, avatars, commands and webhook work; full donor Bot API/Mini Apps remain. |
 | calls, realtime | `src/app/api/calls/*`, `src/app/api/conversations/*/calls`, `src/components/call-overlay.tsx` | partial | WebRTC audio/video signaling works; WebSocket, group calls, TURN and recovery remain. |
 | channels, chats, folders, messages | `src/app/api/conversations/*`, `src/app/api/channels`, `src/app/api/chat-folders`, `src/lib/server/dm.ts` | partial | DM/groups/channels, roles, folders, reactions, reply, pin, edit, delete, forward, media, voice, polls and themes work; typing/online/archive/invites remain. |
 | communities | `src/app/api/communities/*`, `src/app/(main)/communities` | partial | Communities, roles, birthday, privacy and posts work; donor discovery rules remain. |
@@ -29,7 +29,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 | mini-apps, oauth | — | todo | Requires signed app manifest and token scopes. |
 | push | `src/lib/server/push.ts`, `/api/push/*`, `public/sw.js` | partial | Web Push subscription works when VAPID is configured; native push remains. |
 | reports | `/api/reports`, `/api/admin/reports/[id]` | done | User reports and admin resolution verified through build and route smoke tests. |
-| settings, ui-language, translate | `src/app/(main)/accounts/edit` | partial | Privacy/account/theme/session settings work; donor language/translation services remain. |
+| settings, ui-language, translate | `src/app/(main)/accounts/edit`, `src/components/app-context.tsx` | partial | Privacy/account/theme/session settings and English/Russian preference work; donor translation services remain. |
 | shalter-ai | — | todo | Requires explicit AI provider and privacy/limits configuration. |
 | uploads | `src/lib/server/media.ts`, media routes | partial | Local authenticated upload/serving works; S3 and donor media workers remain. |
 | version, link-check, support, hugo | — | todo | Operational/documentation modules; no direct Social equivalent yet. |

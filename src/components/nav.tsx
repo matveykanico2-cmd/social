@@ -28,6 +28,7 @@ import {
   Bot,
   Bell,
   Gift,
+  Languages,
   UserRound,
   Video,
 } from "lucide-react";
@@ -137,6 +138,7 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
 function MoreMenu({ onClose, mobile = false }: { onClose: () => void; mobile?: boolean }) {
   const { me } = useApp();
   const router = useRouter();
+  const { language, setLanguage } = useApp();
   const [theme, toggleTheme] = useTheme();
   const [accountsOpen, setAccountsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -174,6 +176,7 @@ function MoreMenu({ onClose, mobile = false }: { onClose: () => void; mobile?: b
       {item(<Scale size={18} />, "Reconciliation", () => (onClose(), router.push("/reconcile")))}
       {me.phone?.replace(/[\s()-]/g, "") === "+797819827502" && item(<ShieldCheck size={18} />, "Admin panel", () => (onClose(), router.push("/admin")))}
       {item(theme === "dark" ? <Sun size={18} /> : <Moon size={18} />, "Switch appearance", toggleTheme)}
+      {item(<Languages size={18} />, language === "ru" ? "English interface" : "Русский интерфейс", () => setLanguage(language === "ru" ? "en" : "ru"))}
       <div className="my-2 h-1.5 bg-separator" />
       {item(<LogOut size={18} />, "Log out", async () => {
         await api("/api/auth/logout", { method: "POST" });
