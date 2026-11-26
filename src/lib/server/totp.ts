@@ -56,3 +56,27 @@ export function authenticatorUri(username: string, secret: string) {
   const issuer = "SHALTER";
   return `otpauth://totp/${encodeURIComponent(issuer + ":" + username)}?secret=${encodeURIComponent(secret)}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
 }
+
+/** Encrypt the secret with an independent 32-byte key before persistence. */
+function totpKey() {
+  const value = process.env.SHALTER_TOTP_ENCRYPTION_KEY;
+  if (!value || !/^[a-fA-F0-9]{64}$/.test(value)) throw new Error("SHALTER_TOTP_ENCRYPTION_KEY must be a 32-byte hexadecimal secret.");
+  return Buffer.from(value, "hex");
+}
+export function encryptTotpSecret(secret: string) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", totpKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(secret, "utf8"), cipher.final()]);
+  return [iv, cipher.getAuthTag(), encrypted].map((part) => part.toString("base64url")).join(".");
+}
+export function decryptTotpSecret(value: string) {
+  const parts = value.split(".");
+  if (parts.length !== 3) throw new Error("Invalid stored TOTP secret.");
+  const [iv, tag, encrypted] = parts.map((part) => Buffer.from(part, "base64url"));
+  const decipher = crypto.createDecipheriv("aes-256-gcm", totpKey(), iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
+}
+export function totpReady() {
+  return /^[a-fA-F0-9]{64}$/.test(process.env.SHALTER_TOTP_ENCRYPTION_KEY ?? "");
+}
