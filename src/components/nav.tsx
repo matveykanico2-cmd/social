@@ -215,23 +215,25 @@ export function Sidebar() {
   );
   const [panel, setPanel] = useState<"search" | "notifications" | null>(null);
   const [more, setMore] = useState(false);
-  // Close the side panel after navigating.
+  // A panel belongs to the route where it was opened. Deriving this avoids
+  // state updates during navigation, which could swallow the first click.
   const [panelPath, setPanelPath] = useState(pathname);
-  if (panelPath !== pathname) {
-    setPanelPath(pathname);
-    setPanel(null);
-  }
+  const activePanel = panelPath === pathname ? panel : null;
 
-  const narrow = panel !== null || pathname.startsWith("/direct");
-  const is = (p: string) => !panel && (p === "/" ? pathname === "/" : pathname.startsWith(p));
+  const narrow = activePanel !== null || pathname.startsWith("/direct");
+  const is = (p: string) => !activePanel && (p === "/" ? pathname === "/" : pathname.startsWith(p));
+  const togglePanel = (kind: "search" | "notifications") => {
+    setPanelPath(pathname);
+    setPanel((current) => (current === kind ? null : kind));
+  };
 
   const items: { label: string; icon: (active: boolean) => ReactNode; href?: string; onClick?: () => void; active: boolean }[] = [
     { label: "My page", href: `/${me.username}`, active: is(`/${me.username}`), icon: (a) => <UserRound size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "News", href: "/", active: is("/"), icon: (a) => <House size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Search",
-      onClick: () => setPanel((p) => (p === "search" ? null : "search")),
-      active: panel === "search",
+      onClick: () => togglePanel("search"),
+      active: activePanel === "search",
       icon: (a) => <Search size={26} strokeWidth={a ? 2.8 : 1.8} />,
     },
     { label: "Friends", href: "/explore/people", active: is("/explore/people"), icon: (a) => <Users size={25} strokeWidth={a ? 2.6 : 1.8} /> },
@@ -246,8 +248,8 @@ export function Sidebar() {
     { label: "Bots", href: "/bots", active: is("/bots"), icon: (a) => <Bot size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Notifications",
-      onClick: () => setPanel((p) => (p === "notifications" ? null : "notifications")),
-      active: panel === "notifications",
+      onClick: () => togglePanel("notifications"),
+      active: activePanel === "notifications",
       icon: (a) => (
         <span className="relative">
           <Heart size={26} strokeWidth={a ? 2.8 : 1.8} className={a ? "fill-current" : ""} />
@@ -297,12 +299,13 @@ export function Sidebar() {
             );
             const cls = "group flex items-center gap-4 rounded-lg p-2.5 hover:bg-hover";
             return it.href ? (
-              <Link key={it.label} href={it.href} className={cls} title={it.label}>
+              <Link key={it.label} href={it.href} className={cls} title={it.label} onClick={() => { setPanel(null); setMore(false); }}>
                 {inner}
               </Link>
             ) : (
               <button
                 key={it.label}
+                type="button"
                 onClick={it.onClick}
                 className={`${cls} ${it.active ? "outline outline-1 outline-border" : ""}`}
                 title={it.label}
@@ -312,13 +315,13 @@ export function Sidebar() {
             );
           })}
         </div>
-        <button onClick={() => setMore((m) => !m)} className="group flex items-center gap-4 rounded-lg p-3 hover:bg-hover" title="More">
+        <button type="button" onClick={() => setMore((m) => !m)} className="group flex items-center gap-4 rounded-lg p-3 hover:bg-hover" title="More">
           <Menu size={26} strokeWidth={more ? 2.6 : 1.8} />
           {label("More", more)}
         </button>
         {more && <MoreMenu onClose={() => setMore(false)} />}
       </nav>
-      {panel && <SidePanel kind={panel} onClose={() => setPanel(null)} />}
+      {activePanel && <SidePanel kind={activePanel} onClose={() => setPanel(null)} />}
     </>
   );
 }
@@ -381,7 +384,7 @@ export function MobileHomeHeader() {
   const { unread, setCreateOpen } = useApp();
   return (
     <header className="sticky top-0 z-30 flex h-[56px] items-center justify-between bg-bg px-4 md:hidden">
-      <button onClick={() => setCreateOpen(true)} aria-label="Create">
+      <button type="button" onClick={() => setCreateOpen(true)} aria-label="Create">
         <Plus size={30} strokeWidth={1.8} />
       </button>
       <Logo className="text-[30px]" />
