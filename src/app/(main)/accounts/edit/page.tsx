@@ -17,6 +17,12 @@ export default function EditProfilePage() {
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushStatus, setPushStatus] = useState<string | null>(null);
+  const totp = useApi<{ enabled: boolean; available: boolean }>("/api/auth/totp");
+  const [totpPassword, setTotpPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [totpSecret, setTotpSecret] = useState("");
+  const [totpUri, setTotpUri] = useState("");
+  const [totpBusy, setTotpBusy] = useState(false);
   const sessions = useApi<{ sessions: { id: string; current: boolean; createdAt: number }[] }>("/api/auth/sessions");
   const [saving, setSaving] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
@@ -208,6 +214,40 @@ export default function EditProfilePage() {
             <input minLength={8} type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} placeholder="Repeat new password" autoComplete="new-password" className="w-full rounded-lg bg-field px-3 py-2 outline-none" />
             <PrimaryButton type="button" onClick={() => void changePassword()} disabled={passwordBusy || passwords.next.length < 8} className="mt-2">{passwordBusy ? "Updating..." : "Change password"}</PrimaryButton>
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-border p-4">
+          <h2 className="mb-1 text-base font-bold">Two-factor authentication (TOTP)</h2>
+          <p className="mb-3 text-sm text-muted">Use an authenticator app for additional sign-in protection. Keep the encryption key safely backed up on the server.</p>
+          {totp.data?.enabled ? <p className="mb-3 text-sm font-semibold">Authenticator is enabled.</p> : <p className="mb-3 text-sm text-muted">Authenticator is not enabled.</p>}
+          {totp.data && !totp.data.available && <p className="mb-3 text-sm text-danger">Server has not configured SHALTER_TOTP_ENCRYPTION_KEY.</p>}
+          {totp.data?.available && <>
+            <input type="password" autoComplete="current-password" placeholder="Current password" value={totpPassword} onChange={(e) => setTotpPassword(e.target.value)} className="mb-2 w-full rounded-lg bg-field px-3 py-2 outline-none" />
+            {!totp.data.enabled && !totpSecret && <PrimaryButton type="button" disabled={totpBusy || !totpPassword} onClick={async () => {
+              setTotpBusy(true);
+              try {
+                const result = await api<{ secret: string; uri: string }>("/api/auth/totp", { method: "POST", body: { action: "begin", password: totpPassword } });
+                setTotpSecret(result.secret); setTotpUri(result.uri); toast("Add this key to your authenticator app, then confirm a code.");
+              } catch (error) { toast((error as Error).message); } finally { setTotpBusy(false); }
+            }}>Set up authenticator</PrimaryButton>}
+            {totpSecret && <div className="mb-2 rounded-lg bg-field p-3 text-sm">
+              <p>Enter this secret manually in your authenticator app:</p>
+              <p className="my-2 break-all font-mono font-semibold">{totpSecret}</p>
+              <p className="break-all text-xs text-muted">{totpUri}</p>
+              <p className="mt-2 text-xs text-danger">Do not share or screenshot this key. It is only shown during setup.</p>
+            </div>}
+            {(totpSecret || totp.data.enabled) && <>
+              <input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="6-digit authenticator code" value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))} className="my-2 w-full rounded-lg bg-field px-3 py-2 outline-none" />
+              <PrimaryButton type="button" disabled={totpBusy || totpCode.length !== 6 || (totp.data.enabled && !totpPassword)} onClick={async () => {
+                setTotpBusy(true);
+                try {
+                  await api("/api/auth/totp", { method: "POST", body: { action: totp.data?.enabled ? "disable" : "enable", code: totpCode, password: totpPassword } });
+                  setTotpSecret(""); setTotpUri(""); setTotpCode(""); setTotpPassword(""); totp.reload();
+                  toast(totp.data?.enabled ? "Two-factor authentication disabled." : "Two-factor authentication enabled.");
+                } catch (error) { toast((error as Error).message); } finally { setTotpBusy(false); }
+              }}>{totp.data.enabled ? "Disable authenticator" : "Confirm and enable"}</PrimaryButton>
+            </>}
+          </>}
         </section>
         <div className="flex justify-end">
           <PrimaryButton disabled={!changed || saving} className="w-full px-12 py-3 md:w-auto">
