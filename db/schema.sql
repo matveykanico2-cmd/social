@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS messages (
   post_id INTEGER REFERENCES posts(id) ON DELETE SET NULL,
   media_url TEXT,
   media_kind TEXT,
+  media_name TEXT,
   voice_url TEXT,
   call_type TEXT,
   call_status TEXT,

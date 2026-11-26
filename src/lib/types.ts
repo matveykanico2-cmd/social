@@ -12,7 +12,7 @@ export type UserLite = {
 export type Me = UserLite & { email: string; phone?: string | null; lastName: string; bio: string; website: string; cover: string | null; privateAccount: boolean; showActivity: boolean; allowMessages: boolean };
 
 export type Media = { url: string; kind: "image" | "video" };
-export type ChatMedia = { url: string; kind: "image" | "video" | "circle" };
+export type ChatMedia = { url: string; kind: "image" | "video" | "circle" | "file"; name?: string };
 
 export type Post = {
   id: number;

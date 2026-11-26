@@ -174,13 +174,13 @@ export function sendMessage(
 }
 
 export function forwardMessage(messageId: number, targetConversationId: number, userId: number) {
-  const source = get<{ conversation_id: number; kind: MessageKind; text: string; media_url: string | null; media_kind: "image" | "video" | null }>(
-    "SELECT conversation_id, kind, text, media_url, media_kind FROM messages WHERE id = ?",
+  const source = get<{ conversation_id: number; kind: MessageKind; text: string; media_url: string | null; media_kind: ChatMedia["kind"] | null; media_name: string | null }>(
+    "SELECT conversation_id, kind, text, media_url, media_kind, media_name FROM messages WHERE id = ?",
     messageId,
   );
   if (!source || !get("SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?", source.conversation_id, userId)) throw new HttpError(404, "Message not found.");
   if (!get("SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?", targetConversationId, userId)) throw new HttpError(404, "Target chat not found.");
-  if (source.kind === "media" && source.media_url && source.media_kind) return sendMediaMessage(targetConversationId, userId, { url: source.media_url, kind: source.media_kind });
+  if (source.kind === "media" && source.media_url && source.media_kind) return sendMediaMessage(targetConversationId, userId, { url: source.media_url, kind: source.media_kind, name: source.media_name ?? undefined });
   if (!source.text.trim()) throw new HttpError(400, "This message type cannot be forwarded yet.");
   return sendMessage(targetConversationId, userId, `Forwarded: ${source.text}`);
 }
@@ -188,11 +188,12 @@ export function forwardMessage(messageId: number, targetConversationId: number, 
 export function sendMediaMessage(conversationId: number, senderId: number, media: ChatMedia) {
   const t = now();
   const { id } = run(
-    "INSERT INTO messages (conversation_id, sender_id, kind, text, media_url, media_kind, created_at) VALUES (?, ?, 'media', '', ?, ?, ?)",
+    "INSERT INTO messages (conversation_id, sender_id, kind, text, media_url, media_kind, media_name, created_at) VALUES (?, ?, 'media', '', ?, ?, ?, ?)",
     conversationId,
     senderId,
     media.url,
     media.kind,
+    media.name ?? null,
     t,
   );
   run("UPDATE conversations SET updated_at = ? WHERE id = ?", t, conversationId);
@@ -391,7 +392,8 @@ export function loadMessages(conversationId: number, afterId = 0, viewerId: numb
     voice_seconds: number | null;
     voice_url: string | null;
     media_url: string | null;
-    media_kind: "image" | "video" | "circle" | null;
+    media_kind: ChatMedia["kind"] | null;
+    media_name: string | null;
     call_type: "audio" | "video" | null;
     call_status: "outgoing" | "missed" | "ended" | null;
     gift_id: number | null;
@@ -416,7 +418,7 @@ export function loadMessages(conversationId: number, afterId = 0, viewerId: numb
     reply_text: string | null;
     reply_sender_id: number | null;
   }>(
-    `SELECT m.id, m.sender_id, m.kind, m.invoice_id, m.voice_seconds, m.voice_url, m.media_url, m.media_kind, m.call_type, m.call_status,
+    `SELECT m.id, m.sender_id, m.kind, m.invoice_id, m.voice_seconds, m.voice_url, m.media_url, m.media_kind, m.media_name, m.call_type, m.call_status,
        m.gift_id, m.gift_name, m.gift_emoji, m.gift_price, m.poll_question, m.poll_options, m.poll_votes,
        m.reply_to_id, m.edited_at, m.pinned_at, m.text, m.post_id, m.created_at, p.caption AS p_caption,
        u.id AS uid, u.username, u.name, u.avatar, u.verified,
@@ -448,7 +450,7 @@ export function loadMessages(conversationId: number, afterId = 0, viewerId: numb
     invoice: r.invoice_id ? (invoices.get(r.invoice_id) ?? null) : null,
     voiceSeconds: r.voice_seconds,
     voiceUrl: r.voice_url,
-    media: r.media_url && r.media_kind ? { url: r.media_url, kind: r.media_kind } : null,
+    media: r.media_url && r.media_kind ? { url: r.media_url, kind: r.media_kind, ...(r.media_name ? { name: r.media_name } : {}) } : null,
     call: r.call_type && r.call_status ? { type: r.call_type, status: r.call_status } : null,
     gift: r.kind === "gift" && r.gift_emoji && r.gift_name ? { id: r.gift_id, name: r.gift_name, emoji: r.gift_emoji, price: r.gift_price ?? 0 } : null,
     poll: r.kind === "poll" && r.poll_question && r.poll_options ? (() => {

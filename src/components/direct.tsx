@@ -259,6 +259,7 @@ function SharedPostBubble({ post, mine }: { post: NonNullable<Message["post"]>; 
 }
 
 function MediaBubble({ media, mine }: { media: NonNullable<Message["media"]>; mine: boolean }) {
+  if (media.kind === "file") return <a href={media.url} download={media.name} className={`flex items-center gap-2 rounded-xl px-4 py-3 underline-offset-2 hover:underline ${mine ? "bg-bubble-mine text-white" : "bg-bubble-them"}`}><Paperclip size={18} /><span className="max-w-[220px] truncate">{media.name || "Download file"}</span></a>;
   if (media.kind === "circle") return <div className={`overflow-hidden rounded-full border-4 ${mine ? "border-link" : "border-border"}`}><video src={media.url} controls playsInline className="aspect-square h-[220px] w-[220px] object-cover" /></div>;
   return (
     <div className={`max-w-[75%] overflow-hidden rounded-2xl ${mine ? "bg-bubble-mine" : "bg-bubble-them"}`}>
@@ -878,7 +879,7 @@ function Thread({ id }: { id: number }) {
             <input
               ref={fileInput}
               type="file"
-              accept="image/*,video/mp4,video/webm,video/quicktime"
+              accept="image/*,video/mp4,video/webm,video/quicktime,audio/*,.pdf,.zip,.txt,.doc,.docx,.xls,.xlsx"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];

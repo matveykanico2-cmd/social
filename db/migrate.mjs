@@ -55,6 +55,7 @@ const ADDED_COLUMNS = [
   ["messages", "voice_seconds", "INTEGER"],
   ["messages", "media_url", "TEXT"],
   ["messages", "media_kind", "TEXT"],
+  ["messages", "media_name", "TEXT"],
   ["messages", "voice_url", "TEXT"],
   ["messages", "call_type", "TEXT"],
   ["messages", "call_status", "TEXT"],

@@ -35,11 +35,30 @@ const EXT_BY_MIME: Record<string, string> = {
   "audio/ogg": ".ogg",
   "audio/mp4": ".m4a",
   "audio/mpeg": ".mp3",
+  "application/pdf": ".pdf",
+  "application/zip": ".zip",
+  "text/plain": ".txt",
+  "application/msword": ".doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+  "application/vnd.ms-excel": ".xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
 };
 
 export type SavedMedia = { url: string; kind: "image" | "video" };
 
 export type SavedVoice = { url: string; kind: "audio" };
+
+export type SavedChatMedia = { url: string; kind: "image" | "video" | "file"; name: string };
+
+export async function saveChatUpload(file: File): Promise<SavedChatMedia> {
+  const ext = EXT_BY_MIME[file.type];
+  if (!ext) throw new HttpError(400, "This file type isn't supported.");
+  if (file.size > MAX_BYTES) throw new HttpError(400, "File is too large (100 MB max).");
+  await fs.mkdir(UPLOAD_DIR, { recursive: true });
+  const stored = crypto.randomBytes(12).toString("hex") + ext;
+  await fs.writeFile(path.join(UPLOAD_DIR, stored), Buffer.from(await file.arrayBuffer()));
+  return { url: `/api/media/${stored}`, kind: file.type.startsWith("video/") ? "video" : file.type.startsWith("image/") ? "image" : "file", name: file.name.slice(0, 180) || `file${ext}` };
+}
 
 export async function saveUpload(file: File, allow: "image" | "any" = "any"): Promise<SavedMedia> {
   const ext = EXT_BY_MIME[file.type];
