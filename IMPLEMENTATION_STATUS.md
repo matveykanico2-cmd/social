@@ -29,6 +29,8 @@ Social остаётся единым Next.js App Router приложением �
 - Общая защита API: rate limit для изменяющих запросов и auth, Origin/CSRF-проверка и базовые security headers.
 - Realtime-канал чатов: SSE-подписка на разговор, мгновенные события новых сообщений, автоматический reconnect браузера и периодическая синхронизация после пропущенных событий.
 - Раздел Insights со статистикой профиля, публикаций, Reels, Stories и Live за последние 30 дней на реальных данных SQLite.
+- TOTP/2FA: генерация `otpauth`-секрета, включение и отключение по коду, проверка кода при входе и журнал критичных действий.
+- Проверка сигнатур загружаемых изображений, PDF, видео и разрешённых контейнеров до записи в storage.
 - Создана единая `FEATURE_MATRIX.md` по обязательному каталогу Instagram/Shalter с фактическими статусами и ограничениями.
 - Опросы в чатах с сохранением голосов и обновлением результатов.
 - Аудио- и видеозвонки через WebRTC signaling API.
@@ -52,18 +54,18 @@ Social остаётся единым Next.js App Router приложением �
 
 Эти функции присутствуют в доноре, но требуют отдельных адаптеров под текущую SQLite-схему и не должны подключаться копированием независимого Nest/Express runtime:
 
-- WebSocket transport и reconnect вместо текущего polling fallback.
+- Нативный WebSocket transport вместо текущего SSE/reconnect fallback.
 - Полноценные групповые звонки, TURN/ICE recovery и screen sharing.
 - Стикеры/GIF/документы и медиа-транскодирование через ffmpeg/sharp.
 - Bot API полного Telegram-совместимого объёма, Mini Apps и SDK.
 - Жалобы, блокировки, модерация и safety labels.
-- 2FA/TOTP, passkeys и OAuth.
+- Passkeys и OAuth.
 - Premium, игры/leaderboards, nearby и дополнительные нативные Android/Desktop оболочки.
 - S3 storage и RTMP ingest для production-медиа/live.
 
 ## Проверки текущего состояния
 
-Команда `npm run check` проходит: ESLint, TypeScript, 66 тестов Vitest и production build. Основные маршруты Social проверяются HTTP smoke-тестами. Секреты, локальная SQLite-база и uploads исключены из Git.
+Команда `npm run check` проходит: ESLint, TypeScript, 73 теста Vitest и production build с 70 маршрутами. Основные маршруты Social проверяются HTTP smoke-тестами. Секреты, локальная SQLite-база и uploads исключены из Git.
 
 ## Правила публикации
 

@@ -2,6 +2,7 @@ import { route, jsonBody, HttpError } from "@/lib/server/http";
 import { get, run } from "@/lib/server/db";
 import { decryptTotpSecret, verifyTotp } from "@/lib/server/totp";
 import { startSession, verifyPassword } from "@/lib/server/auth";
+import { audit } from "@/lib/server/audit";
 
 export const POST = route(async (req) => {
   const body = await jsonBody<{ login: string; password: string; totpCode?: string }>(req);
@@ -23,5 +24,6 @@ export const POST = route(async (req) => {
     if (!result.changes) throw new HttpError(401, "Authenticator code was already used.");
   }
   await startSession(user.id);
+  audit(user.id, "auth.login", req);
   return { ok: true };
 });

@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { HttpError } from "./http";
+import { validateFileSignature } from "../media-signature";
 
 export const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_BYTES = 100 * 1024 * 1024;
@@ -44,6 +45,11 @@ const EXT_BY_MIME: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
 };
 
+async function checkedBytes(file: File) {
+  const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  if (!validateFileSignature(file.type, bytes)) throw new HttpError(400, "The file content does not match its declared type.");
+}
+
 export type SavedMedia = { url: string; kind: "image" | "video" };
 
 export type SavedVoice = { url: string; kind: "audio" };
@@ -54,6 +60,7 @@ export async function saveChatUpload(file: File): Promise<SavedChatMedia> {
   const ext = EXT_BY_MIME[file.type];
   if (!ext) throw new HttpError(400, "This file type isn't supported.");
   if (file.size > MAX_BYTES) throw new HttpError(400, "File is too large (100 MB max).");
+  await checkedBytes(file);
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
   const stored = crypto.randomBytes(12).toString("hex") + ext;
   await fs.writeFile(path.join(UPLOAD_DIR, stored), Buffer.from(await file.arrayBuffer()));
@@ -66,6 +73,7 @@ export async function saveUpload(file: File, allow: "image" | "any" = "any"): Pr
   const kind = file.type.startsWith("video/") ? "video" : "image";
   if (allow === "image" && kind !== "image") throw new HttpError(400, "Please choose a photo.");
   if (file.size > MAX_BYTES) throw new HttpError(400, "File is too large (100 MB max).");
+  await checkedBytes(file);
 
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
   const name = crypto.randomBytes(12).toString("hex") + ext;
@@ -77,6 +85,7 @@ export async function saveVoiceUpload(file: File): Promise<SavedVoice> {
   const ext = EXT_BY_MIME[file.type];
   if (!ext || !file.type.startsWith("audio/")) throw new HttpError(400, "Record a supported audio message.");
   if (file.size > 20 * 1024 * 1024) throw new HttpError(400, "Voice message is too large.");
+  await checkedBytes(file);
   await fs.mkdir(UPLOAD_DIR, { recursive: true });
   const name = crypto.randomBytes(12).toString("hex") + ext;
   await fs.writeFile(path.join(UPLOAD_DIR, name), Buffer.from(await file.arrayBuffer()));
