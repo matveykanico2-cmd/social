@@ -92,6 +92,8 @@ export function migrate(db) {
     CREATE INDEX IF NOT EXISTS chat_folder_items_user ON chat_folder_items(user_id, folder_id, conversation_id);
     CREATE INDEX IF NOT EXISTS conversation_typing_updated ON conversation_typing(conversation_id, updated_at);
     CREATE INDEX IF NOT EXISTS friend_requests_addressee ON friend_requests(addressee_id, status, updated_at);
+    CREATE INDEX IF NOT EXISTS marketplace_listings_feed ON marketplace_listings(status, category, created_at);
+    CREATE INDEX IF NOT EXISTS marketplace_listings_user ON marketplace_listings(user_id, status, created_at);
   `);
   ensureWelcomeMessages(db);
 }

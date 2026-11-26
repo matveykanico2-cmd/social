@@ -31,6 +31,7 @@ import {
   Languages,
   UserRound,
   Video,
+  Store,
 } from "lucide-react";
 import { api, BASE_PATH } from "@/lib/client";
 import { useApp } from "./app-context";
@@ -59,7 +60,7 @@ function Dot({ show }: { show: boolean }) {
 }
 
 const ruNav: Record<string, string> = {
-  "My page": "Моя страница", News: "Новости", Search: "Поиск", Friends: "Друзья", Communities: "Сообщества", Messenger: "Мессенджер", Photos: "Фото", Video: "Видео", Clips: "Клипы", Channels: "Каналы", Live: "Трансляции", Gifts: "Подарки", Bots: "Боты", Notifications: "Уведомления", Create: "Создать", Profile: "Профиль", More: "Ещё",
+  "My page": "Моя страница", News: "Новости", Search: "Поиск", Friends: "Друзья", Communities: "Сообщества", Messenger: "Мессенджер", Photos: "Фото", Video: "Видео", Clips: "Клипы", Channels: "Каналы", Live: "Трансляции", Marketplace: "Маркетплейс", Gifts: "Подарки", Bots: "Боты", Notifications: "Уведомления", Create: "Создать", Profile: "Профиль", More: "Ещё",
 };
 
 function useTheme() {
@@ -251,6 +252,7 @@ export function Sidebar() {
     { label: "Clips", href: "/reels", active: is("/reels"), icon: (a) => <Clapperboard size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Channels", href: "/channels", active: is("/channels"), icon: (a) => <Aperture size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Live", href: "/live", active: is("/live"), icon: (a) => <Radio size={25} strokeWidth={a ? 2.6 : 1.8} className={a ? "text-danger" : ""} /> },
+    { label: "Marketplace", href: "/marketplace", active: is("/marketplace"), icon: (a) => <Store size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Gifts", href: `/${encodeURIComponent(me.username)}?tab=gifts`, active: false, icon: (a) => <Gift size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Bots", href: "/bots", active: is("/bots"), icon: (a) => <Bot size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {

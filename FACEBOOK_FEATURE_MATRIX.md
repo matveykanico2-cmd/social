@@ -13,7 +13,7 @@
 | Messenger | partial | `/direct` | Основные сообщения, voice, media, circles, read states и calls есть; WebSocket/typing/group calls остаются |
 | Stories и Reels | partial | `/stories`, `/reels` | Ограничены текущей media-моделью |
 | Watch/live | partial | `/live` | Нет RTMP ingest/transcoding |
-| Marketplace | todo | — | Не добавлен без безопасной модели объявлений и moderation |
+| Marketplace | partial | `/marketplace`, `/api/marketplace` | Объявления, категории, фото, поиск, фильтры и удаление работают; платежи, сообщения продавцу и moderation queue остаются |
 | Уведомления и Push | partial | `/notifications`, `/api/push` | Web Push требует VAPID-конфигурации |
 | Admin/moderation | partial | `/admin` | Нет полного safety-label и audit-контракта донора |
 | Темы/мобильная навигация/PWA | done | shell, manifest, global CSS | Native apps не входят в web runtime |

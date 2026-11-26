@@ -18,6 +18,10 @@
 | premium, stars, games, nearby | — | todo | blocked | — | Нужны платежи, sandbox игр, geo/privacy policy и отдельные API |
 | S3, RTMP, workers, native clients | — | todo | blocked | — | Требуются внешние production-сервисы, ffmpeg/RTMP, очереди и подпись Android/Desktop |
 
+## Дополнительные Facebook-модули
+
+Marketplace реализован как единая Social-модель объявлений с авторизованными API и локальным upload storage. Платежи намеренно не подключены: для production нужны отдельный провайдер, accounting, fraud checks и moderation queue.
+
 ## Текущая проверка
 
 `npm run check` проходит: ESLint, TypeScript, 66 Vitest-тестов и production build с 63 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.

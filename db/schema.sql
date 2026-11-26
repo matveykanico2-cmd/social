@@ -503,3 +503,20 @@ CREATE TABLE IF NOT EXISTS chat_settings (
   PRIMARY KEY (user_id, conversation_id)
 );
 CREATE INDEX IF NOT EXISTS chat_settings_conversation ON chat_settings(conversation_id, user_id);
+
+-- Marketplace listings; payments are intentionally not connected.
+CREATE TABLE IF NOT EXISTS marketplace_listings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT 'Other',
+  location TEXT NOT NULL DEFAULT '',
+  price INTEGER NOT NULL DEFAULT 0,
+  image_url TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS marketplace_listings_feed ON marketplace_listings(status, category, created_at);
+CREATE INDEX IF NOT EXISTS marketplace_listings_user ON marketplace_listings(user_id, status, created_at);
