@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BarChart3, ChevronDown, ChevronLeft, FolderPlus, Forward, Gift, Image as ImageIcon, Info, Mic, MoreHorizontal, Palette, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
+import { BarChart3, ChevronDown, ChevronLeft, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
 import { api, timeAgo, useApi, useIsPhone } from "@/lib/client";
 import type { Conversation, FollowUser, Message, Post, UserLite } from "@/lib/types";
 import { CallOverlay, type CallSignal } from "./call-overlay";
@@ -868,8 +868,8 @@ function Thread({ id }: { id: number }) {
                 if (file) void sendMedia(file);
               }}
             />
-            <button type="button" onClick={() => fileInput.current?.click()} aria-label="Add photo or video">
-              <ImageIcon size={24} />
+            <button type="button" onClick={() => fileInput.current?.click()} aria-label="Attach photo or video" title="Attach photo or video">
+              <Paperclip size={23} />
             </button>
             <button type="button" onClick={() => { setStickerOpen((open) => !open); setGiftOpen(false); setEmojiOpen(false); }} aria-label="Choose a sticker" title="Choose a sticker">
               <Sticker size={24} />
