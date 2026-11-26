@@ -430,16 +430,32 @@ function Thread({ id }: { id: number }) {
       }
     };
     poll();
-    // SSE delivers new messages immediately; this slower reconciliation pass
-    // recovers events after a tab sleep, server restart, or dropped stream.
-    const events = new EventSource(`/api/conversations/${id}/events`);
-    events.addEventListener("message", () => void poll());
-    events.addEventListener("sync", () => void poll());
+    // Prefer the standalone WebSocket runtime when enabled; SSE remains a
+    // first-class fallback for `next start` and serverless deployments.
+    let fallback: EventSource | null = null;
+    const openFallback = () => {
+      if (stop || fallback) return;
+      fallback = new EventSource(`/api/conversations/${id}/events`);
+      fallback.addEventListener("message", () => void poll());
+      fallback.addEventListener("sync", () => void poll());
+    };
+    const wsEnabled = process.env.NEXT_PUBLIC_WS_ENABLED === "1";
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/ws`;
+    const socket = wsEnabled ? new WebSocket(wsUrl) : null;
+    if (socket) {
+      socket.onopen = () => socket.send(JSON.stringify({ type: "subscribe", conversationId: id, after: lastId.current }));
+      socket.onmessage = () => void poll();
+      socket.onclose = openFallback;
+      socket.onerror = openFallback;
+    } else openFallback();
+    // This slower reconciliation pass recovers events after tab sleep,
+    // server restart, or a dropped realtime stream.
     const t = setInterval(poll, 10000);
     return () => {
       stop = true;
       clearInterval(t);
-      events.close();
+      socket?.close();
+      fallback?.close();
     };
   }, [id, me.id, refreshUnread, retry]);
 
