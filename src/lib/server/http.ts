@@ -1,4 +1,5 @@
 import "server-only";
+import { guardRequest, SecurityError, securityHeaders } from "./security";
 
 export class HttpError extends Error {
   constructor(
@@ -15,13 +16,17 @@ type Handler<C> = (req: Request, ctx: C) => Promise<unknown>;
 export function route<C>(fn: Handler<C>) {
   return async (req: Request, ctx: C) => {
     try {
+      guardRequest(req);
       const result = await fn(req, ctx);
-      if (result instanceof Response) return result;
-      return Response.json(result ?? { ok: true });
+      if (result instanceof Response) {
+        const headers = securityHeaders(new Headers(result.headers));
+        return new Response(result.body, { status: result.status, statusText: result.statusText, headers });
+      }
+      return Response.json(result ?? { ok: true }, { headers: securityHeaders() });
     } catch (e) {
-      if (e instanceof HttpError) return Response.json({ error: e.message }, { status: e.status });
+      if (e instanceof HttpError || e instanceof SecurityError) return Response.json({ error: e.message }, { status: e.status, headers: securityHeaders() });
       console.error(e);
-      return Response.json({ error: "Something went wrong." }, { status: 500 });
+      return Response.json({ error: "Something went wrong." }, { status: 500, headers: securityHeaders() });
     }
   };
 }

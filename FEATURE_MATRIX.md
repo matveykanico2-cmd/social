@@ -17,7 +17,7 @@
 | Live | rooms, viewers, route/UI | RTMP, recording, guests, realtime moderation | `/api/live`; build |
 | Professional tools | business flag/category, admin panel, server stats | creator analytics dashboard, scheduler, ads cabinet | admin/settings; build |
 | Commerce | Marketplace listings, image, categories, search, seller chat, admin removal, gifts | payments, orders, anti-fraud, payouts | `/marketplace`, `/api/marketplace`; build |
-| Security/moderation | HTTP-only sessions, ownership checks, blocks, reports, admin roles, MIME/size limits | rate limiting, CSRF tokens, MIME sniffing/quarantine, 2FA, audit log | auth/admin/media; build + tests |
+| Security/moderation | HTTP-only sessions, ownership checks, blocks, reports, admin roles, MIME/size limits, write/auth rate limits, Origin checks, security headers | MIME sniffing/quarantine, 2FA, audit log | auth/admin/media/security guard; build + 69 tests |
 | UX/mobile | responsive nav, themes, avatar fallback, loading/error boundaries, PWA manifest, Russian default | Playwright viewport matrix, native Android/Desktop, offline queue | CSS/nav/PWA; production build |
 
 ## Verification
