@@ -1,7 +1,7 @@
 import { route, intParam, jsonBody, HttpError } from "@/lib/server/http";
 import { get, run } from "@/lib/server/db";
 import { requireUser } from "@/lib/server/auth";
-import { conversationDetails, loadMessages, messageIds, otherLastRead, otherMember, sendMessage, sendCallMessage, sendPoll } from "@/lib/server/dm";
+import { conversationDetails, loadMessages, messageIds, otherLastRead, otherMember, sendMessage, sendCallMessage, sendPoll, sendStickerMessage } from "@/lib/server/dm";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -32,7 +32,7 @@ export const POST = route(async (req, { params }: Ctx) => {
   const me = await requireUser();
   const id = intParam((await params).id);
   otherMember(id, me.id);
-  const body = await jsonBody<{ text?: string; callType?: "audio" | "video"; replyToId?: number; poll?: { question?: string; options?: string[] } }>(req);
+  const body = await jsonBody<{ text?: string; sticker?: string; callType?: "audio" | "video"; replyToId?: number; poll?: { question?: string; options?: string[] } }>(req);
   const channel = get<{ kind: string; owner_id: number | null }>("SELECT kind, owner_id FROM conversations WHERE id = ?", id);
   if (channel?.kind === "channel" && channel.owner_id !== me.id) throw new HttpError(403, "Only the channel owner can publish updates.");
   if (body.callType === "audio" || body.callType === "video") {
@@ -41,6 +41,10 @@ export const POST = route(async (req, { params }: Ctx) => {
   }
   if (body.poll) {
     const messageId = sendPoll(id, me.id, String(body.poll.question ?? ""), Array.isArray(body.poll.options) ? body.poll.options.map(String) : []);
+    return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
+  }
+  if (body.sticker) {
+    const messageId = sendStickerMessage(id, me.id, String(body.sticker));
     return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
   }
   const text = String(body.text ?? "").trim().slice(0, 1000);

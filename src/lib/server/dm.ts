@@ -173,6 +173,15 @@ export function sendMessage(
   return id;
 }
 
+export function sendStickerMessage(conversationId: number, senderId: number, emoji: string) {
+  if (!get("SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?", conversationId, senderId)) throw new HttpError(404, "Conversation not found.");
+  const t = now();
+  const { id } = run("INSERT INTO messages (conversation_id, sender_id, kind, text, created_at) VALUES (?, ?, 'sticker', ?, ?)", conversationId, senderId, emoji.slice(0, 12), t);
+  run("UPDATE conversations SET updated_at = ? WHERE id = ?", t, conversationId);
+  run("UPDATE conversation_members SET last_read_id = ? WHERE conversation_id = ? AND user_id = ?", id, conversationId, senderId);
+  return id;
+}
+
 export function forwardMessage(messageId: number, targetConversationId: number, userId: number) {
   const source = get<{ conversation_id: number; kind: MessageKind; text: string; media_url: string | null; media_kind: ChatMedia["kind"] | null; media_name: string | null }>(
     "SELECT conversation_id, kind, text, media_url, media_kind, media_name FROM messages WHERE id = ?",

@@ -199,6 +199,28 @@ CREATE TABLE IF NOT EXISTS message_reactions (
 );
 CREATE INDEX IF NOT EXISTS message_reactions_message ON message_reactions(message_id);
 
+CREATE TABLE IF NOT EXISTS sticker_packs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS stickers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  pack_id INTEGER NOT NULL REFERENCES sticker_packs(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL,
+  label TEXT NOT NULL DEFAULT '',
+  UNIQUE(pack_id, emoji)
+);
+INSERT OR IGNORE INTO sticker_packs (name, created_at) VALUES ('Shalter basics', 0);
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🦊', 'Fox' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🐼', 'Panda' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🐸', 'Frog' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🦄', 'Unicorn' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '👻', 'Ghost' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🤖', 'Robot' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '👑', 'Crown' FROM sticker_packs WHERE name = 'Shalter basics';
+INSERT OR IGNORE INTO stickers (pack_id, emoji, label) SELECT id, '🚀', 'Rocket' FROM sticker_packs WHERE name = 'Shalter basics';
+
 CREATE TABLE IF NOT EXISTS gift_catalog (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,

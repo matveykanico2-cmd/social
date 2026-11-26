@@ -98,7 +98,7 @@ export type InvoiceCard = {
 };
 
 /** "welcome" is the automatic first message of a conversation (src/config/welcome-message.mjs). */
-export type MessageKind = "text" | "post" | "voice" | "media" | "call" | "gift" | "poll" | "invoice" | "receipt" | "welcome";
+export type MessageKind = "text" | "post" | "voice" | "media" | "sticker" | "call" | "gift" | "poll" | "invoice" | "receipt" | "welcome";
 
 export type Message = {
   id: number;

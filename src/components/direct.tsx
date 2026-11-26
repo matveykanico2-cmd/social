@@ -329,8 +329,6 @@ function ForwardModal({ message, onClose, onDone }: { message: Message; onClose:
 }
 
 const QUICK_EMOJI = ["😂", "😍", "🥰", "😊", "😅", "😎", "🤔", "😢", "👍", "👌", "🙏", "👏", "💪", "🔥", "✨", "🎉", "❤️", "💕", "🤍", "✅", "📦", "👕", "☕", "🛍️"];
-const QUICK_STICKERS = ["🦊", "🐼", "🐸", "🐱", "🐶", "🦄", "👻", "🤖", "👑", "💫", "🌈", "🍕", "🚀", "🎈", "💌", "🎁"];
-
 /** Messages are shown in time order; ids break ties. */
 const byTime = (a: Message, b: Message) => a.createdAt - b.createdAt || a.id - b.id;
 
@@ -368,6 +366,7 @@ function Thread({ id }: { id: number }) {
   const [searchResults, setSearchResults] = useState<Message[] | null>(null);
   const [giftOpen, setGiftOpen] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
+  const stickers = useApi<{ packs: { id: number; name: string; emoji: string; label: string }[] }>(stickerOpen ? "/api/stickers" : null);
   const gifts = useApi<{ gifts: { id: number; name: string; emoji: string; price: number }[] }>(giftOpen ? "/api/gifts" : null);
   const isMuted = mutedUntil !== null;
   const bottom = useRef<HTMLDivElement>(null);
@@ -465,6 +464,12 @@ function Thread({ id }: { id: number }) {
       toast((e as Error).message);
       setText(t);
     }
+  };
+
+  const sendSticker = async (emoji: string) => {
+    const { message } = await api<{ message: Message }>(`/api/conversations/${id}/messages`, { body: { sticker: emoji } });
+    if (message) setMessages((m) => [...(m ?? []), message].sort(byTime));
+    setStickerOpen(false);
   };
 
   const edit = async (body: string) => {
@@ -862,7 +867,7 @@ function Thread({ id }: { id: number }) {
         )}
         {stickerOpen && (
           <div className="absolute bottom-[52px] right-0 grid grid-cols-4 gap-1 rounded-2xl border border-border bg-elevated p-3 shadow-xl">
-            {QUICK_STICKERS.map((sticker) => <button type="button" key={sticker} onClick={() => { void send(sticker); setStickerOpen(false); }} className="rounded-xl p-2 text-3xl hover:bg-hover" aria-label={`Send sticker ${sticker}`}>{sticker}</button>)}
+            {stickers.loading ? <Spinner size={22} /> : stickers.data?.packs.map((sticker) => <button type="button" key={sticker.id} onClick={() => void sendSticker(sticker.emoji)} className="rounded-xl p-2 text-3xl hover:bg-hover" aria-label={`Send sticker ${sticker.label}`}>{sticker.emoji}</button>)}
           </div>
         )}
         {giftOpen && <div className="absolute bottom-[52px] right-0 grid grid-cols-3 gap-2 rounded-2xl border border-border bg-elevated p-3 shadow-xl">{gifts.loading ? <Spinner size={22} /> : gifts.data?.gifts.map((gift) => <button type="button" key={gift.id} onClick={() => void sendGiftMessage(gift)} className="flex w-20 flex-col items-center rounded-xl p-2 hover:bg-hover"><span className="text-3xl">{gift.emoji}</span><span className="mt-1 truncate text-xs font-semibold">{gift.name}</span><span className="text-[10px] text-muted">{gift.price} stars</span></button>)}</div>}

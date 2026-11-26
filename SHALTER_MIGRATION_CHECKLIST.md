@@ -23,7 +23,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 | downloads, export, share-target, short-links | `/api/share`, media routes | partial | Sharing and media serving work; donor download/export/share-target contracts remain. |
 | exchange, stars, premium, purchase | — | todo | Requires payment provider and accounting model; no fake payment implementation added. |
 | games | — | todo | Donor games and leaderboards require sandboxed asset/API integration. |
-| gifts, stickers | Gifts: `src/app/api/gifts`, `src/app/api/conversations/*/gifts`; stickers: UI emoji fallback | partial | Gifts work; donor sticker catalog/assets remain. |
+| gifts, stickers | Gifts: `src/app/api/gifts`, `src/app/api/conversations/*/gifts`; stickers: `/api/stickers`, messenger composer | partial | Gifts and server-backed Shalter basics sticker catalog work; donor custom-emoji assets and full pack management remain. |
 | live | `src/app/api/live/*`, `src/app/(main)/live` | partial | Live rooms and viewer records work; RTMP ingest/transcoding remains. |
 | posts, stories, topics, search | `src/app/api/posts/*`, `stories/*`, `/api/search`, `/api/explore` | partial | Social feed, Stories, Reels, comments with attachments/nested replies and search work; donor topic/search ranking remains. |
 | mini-apps, oauth | — | todo | Requires signed app manifest and token scopes. |

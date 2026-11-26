@@ -14,7 +14,7 @@
 | bots | bots page/API | partial | partial | build | CRUD, аватары, команды и webhook есть; полный Bot API, Mini Apps SDK и scopes отсутствуют |
 | posts, stories, live | feed, stories, live routes | partial | partial | build + Vitest | Публикации, Stories, Reels и live работают; ranking, RTMP и transcoding отсутствуют |
 | gifts, push, reports | gifts, notifications, push, admin | partial | partial | build | Подарки, Web Push и жалобы есть; платежная инфраструктура не подключена |
-| stickers, GIF, documents | messenger composer/media | partial | partial | build | Emoji/sticker fallback, image/video/audio/document upload есть; каталог стикеров и GIF provider требуют отдельных каталогов/провайдеров |
+| stickers, GIF, documents | messenger composer/media | partial | partial | build | Server-backed sticker basics catalog, image/video/audio/document upload есть; custom-emoji assets и GIF provider требуют отдельных каталогов/провайдеров |
 | premium, stars, games, nearby | — | todo | blocked | — | Нужны платежи, sandbox игр, geo/privacy policy и отдельные API |
 | S3, RTMP, workers, native clients | — | todo | blocked | — | Требуются внешние production-сервисы, ffmpeg/RTMP, очереди и подпись Android/Desktop |
 
@@ -24,4 +24,4 @@ Marketplace реализован как единая Social-модель объ�
 
 ## Текущая проверка
 
-`npm run check` проходит: ESLint, TypeScript, 66 Vitest-тестов и production build с 63 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.
+`npm run check` проходит: ESLint, TypeScript, 66 Vitest-тестов и production build с 66 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.
