@@ -24,6 +24,9 @@ export function openDatabase(file = databasePath()) {
 
 /** [table, column, definition] — columns added to tables that already existed. */
 const ADDED_COLUMNS = [
+  ["users", "totp_secret", "TEXT"],
+  ["users", "totp_pending_secret", "TEXT"],
+  ["users", "totp_last_counter", "INTEGER NOT NULL DEFAULT -1"],
   ["users", "is_business", "INTEGER NOT NULL DEFAULT 0"],
   ["users", "phone", "TEXT"],
   ["users", "last_name", "TEXT NOT NULL DEFAULT ''"],
