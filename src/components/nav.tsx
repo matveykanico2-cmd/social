@@ -58,6 +58,10 @@ function Dot({ show }: { show: boolean }) {
   return show ? <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-bg bg-[#ff3040]" /> : null;
 }
 
+const ruNav: Record<string, string> = {
+  "My page": "Моя страница", News: "Новости", Search: "Поиск", Friends: "Друзья", Communities: "Сообщества", Messenger: "Мессенджер", Photos: "Фото", Video: "Видео", Clips: "Клипы", Channels: "Каналы", Live: "Трансляции", Gifts: "Подарки", Bots: "Боты", Notifications: "Уведомления", Create: "Создать", Profile: "Профиль", More: "Ещё",
+};
+
 function useTheme() {
   // Only rendered after a click, so reading the DOM here is safe.
   const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === "dark" ? "dark" : "light"));
@@ -189,13 +193,13 @@ function MoreMenu({ onClose, mobile = false }: { onClose: () => void; mobile?: b
 
 /** Persistent desktop header: compact VK-style global navigation and search. */
 export function TopBar() {
-  const { me, unread } = useApp();
+  const { me, unread, language } = useApp();
   return (
     <header className="vk-topbar fixed left-0 right-0 top-0 z-30 hidden h-16 items-center border-b border-separator pl-[88px] pr-6 md:flex xl:pl-[260px]">
       <Link href="/" className="mr-6 shrink-0" aria-label="Shalter home"><Logo className="text-[27px]" /></Link>
       <Link href="/explore" className="flex h-10 min-w-0 max-w-[430px] flex-1 items-center gap-2 rounded-lg bg-field px-3 text-muted hover:bg-secondary-hover" aria-label="Search">
         <Search size={18} />
-        <span>Search people, communities and posts</span>
+        <span>{language === "ru" ? "Поиск людей, сообществ и публикаций" : "Search people, communities and posts"}</span>
       </Link>
       <div className="ml-auto flex items-center gap-1 pl-5">
         <Link href="/notifications" className="relative rounded-lg p-2.5 hover:bg-hover" aria-label="Notifications"><Bell size={21} /><Dot show={unread.notifications > 0} /></Link>
@@ -207,7 +211,7 @@ export function TopBar() {
 }
 
 export function Sidebar() {
-  const { me, unread, setCreateOpen } = useApp();
+  const { me, unread, setCreateOpen, language } = useApp();
   const pathname = usePathname();
   // Path-dependent links can be prerendered from a different URL during an RSC refresh.
   // Keep the first server/client tree identical, then reveal the real navigation.
@@ -274,7 +278,7 @@ export function Sidebar() {
   ];
 
   const label = (text: string, active: boolean) => (
-    <span className={`${narrow ? "hidden" : "hidden xl:inline"} ${active ? "font-bold" : ""} text-base`}>{text}</span>
+    <span className={`${narrow ? "hidden" : "hidden xl:inline"} ${active ? "font-bold" : ""} text-base`}>{language === "ru" ? ruNav[text] ?? text : text}</span>
   );
 
   if (!hydrated) {
