@@ -384,6 +384,7 @@ export function loadInvoices(ids: number[]): Map<number, InvoiceCard> {
 
 /** Messages in time order (the welcome message is dated at the conversation's start even when added later). */
 export function loadMessages(conversationId: number, afterId = 0, viewerId: number | null = null): Message[] {
+  const initialOrder = afterId ? "ORDER BY m.created_at, m.id" : "ORDER BY m.created_at DESC, m.id DESC LIMIT 100";
   const rows = all<{
     id: number;
     sender_id: number;
@@ -427,10 +428,11 @@ export function loadMessages(conversationId: number, afterId = 0, viewerId: numb
      LEFT JOIN posts p ON p.id = m.post_id
      LEFT JOIN users u ON u.id = p.user_id
      LEFT JOIN messages reply ON reply.id = m.reply_to_id
-     WHERE m.conversation_id = ? AND m.id > ? ORDER BY m.created_at, m.id`,
+     WHERE m.conversation_id = ? AND m.id > ? ${initialOrder}`,
     conversationId,
     afterId,
   );
+  if (!afterId) rows.reverse();
   const reactionRows = rows.length
     ? all<{ message_id: number; emoji: string; count: number; reacted: number }>(
         `SELECT message_id, emoji, COUNT(*) AS count,

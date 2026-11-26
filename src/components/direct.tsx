@@ -396,9 +396,10 @@ function Thread({ id }: { id: number }) {
     let stop = false;
     const poll = async () => {
       try {
-      const d = await api<{ other: UserLite; messages: Message[]; ids: number[]; otherLastReadId: number; theme?: string; wallpaper?: string; mutedUntil?: number | null; title?: string | null; kind?: "direct" | "group" | "channel"; members?: UserLite[] }>(
-          `/api/conversations/${id}/messages?after=${lastId.current}`,
-        );
+        const [d, callState] = await Promise.all([
+          api<{ other: UserLite; messages: Message[]; ids: number[]; otherLastReadId: number; theme?: string; wallpaper?: string; mutedUntil?: number | null; title?: string | null; kind?: "direct" | "group" | "channel"; members?: UserLite[] }>(`/api/conversations/${id}/messages?after=${lastId.current}`),
+          api<{ call: CallSignal | null }>(`/api/conversations/${id}/calls`).catch(() => ({ call: null })),
+        ]);
         if (stop) return;
         loadedThread.current = true;
         setOther(d.other);
@@ -415,7 +416,6 @@ function Thread({ id }: { id: number }) {
         const present = new Set(d.ids);
         const newest = d.ids.length ? Math.max(...d.ids) : 0;
         setMessages((m) => (m && m.some((x) => x.id <= newest && !present.has(x.id)) ? m.filter((x) => x.id > newest || present.has(x.id)) : m));
-        const callState = await api<{ call: CallSignal | null }>(`/api/conversations/${id}/calls`).catch(() => ({ call: null }));
         if (callState.call && callState.call.initiator_id !== me.id && callState.call.status !== "ended") setIncomingCall(callState.call);
         if (d.messages.length) {
           lastId.current = Math.max(lastId.current, ...d.messages.map((x) => x.id));
