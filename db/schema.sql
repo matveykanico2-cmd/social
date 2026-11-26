@@ -78,6 +78,26 @@ CREATE TABLE IF NOT EXISTS follows (
   created_at INTEGER NOT NULL,
   PRIMARY KEY (follower_id, following_id)
 );
+
+CREATE TABLE IF NOT EXISTS user_blocks (
+  blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  blocked_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (blocker_id, blocked_id),
+  CHECK (blocker_id != blocked_id)
+);
+CREATE INDEX IF NOT EXISTS user_blocks_blocked ON user_blocks(blocked_id);
+
+CREATE TABLE IF NOT EXISTS reports (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  target_type TEXT NOT NULL,
+  target_id INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reports_status ON reports(status, created_at);
 CREATE INDEX IF NOT EXISTS follows_following ON follows(following_id);
 
 CREATE TABLE IF NOT EXISTS stories (

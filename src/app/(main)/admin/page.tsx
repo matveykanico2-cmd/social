@@ -1,14 +1,15 @@
 "use client";
 
-import { ShieldCheck, Trash2, UserCheck, Users, Image as ImageIcon, MessageCircle, Clapperboard, Mail, Radio, MessagesSquare, Globe2 } from "lucide-react";
+import { ShieldCheck, Trash2, UserCheck, Users, Image as ImageIcon, MessageCircle, Clapperboard, Mail, Radio, MessagesSquare, Globe2, Flag } from "lucide-react";
 import { useState } from "react";
 import { api, useApi } from "@/lib/client";
 import { PrimaryButton, Verified } from "@/components/ui";
 
 type Overview = {
-  stats: { users: number; posts: number; stories: number; messages: number; conversations: number; channels: number; communities: number; live: number };
+  stats: { users: number; posts: number; stories: number; messages: number; conversations: number; channels: number; communities: number; live: number; reports: number };
   users: { id: number; username: string; name: string; phone: string | null; verified: number; created_at: number }[];
   posts: { id: number; username: string; caption: string; type: string; created_at: number }[];
+  reports: { id: number; reporter: string; target_type: string; target_id: number; reason: string; status: string; created_at: number }[];
 };
 type ServerStatus = { status: string; node: string; uptimeSeconds: number; environment: string; database: { users: number; conversations: number; media: number }; integrations: { smtp: boolean; push: boolean } };
 
@@ -55,6 +56,7 @@ export default function AdminPage() {
     [MessagesSquare, "Chats", data.stats.conversations],
     [Globe2, "Communities", data.stats.communities],
     [Radio, "Live now", data.stats.live],
+    [Flag, "Open reports", data.stats.reports],
   ] as const;
 
   return (
@@ -81,6 +83,13 @@ export default function AdminPage() {
         </section>
       </div>
       <div className="mt-6"><PrimaryButton type="button" onClick={reload}>Refresh</PrimaryButton></div>
+      <section className="mt-6 rounded-xl border border-border bg-elevated">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold"><Flag size={18} />Moderation reports</h2><span className="text-xs text-muted">{data.stats.reports} open</span></div>
+        <div className="divide-y divide-border">
+          {data.reports.map((report) => <div key={report.id} className="flex flex-wrap items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="font-semibold">{report.target_type} #{report.target_id} <span className="font-normal text-muted">by @{report.reporter}</span></div><div className="truncate text-sm text-muted">{report.reason}</div></div><span className="rounded-full bg-field px-2 py-1 text-xs text-muted">{report.status}</span>{report.status === "open" && <div className="flex gap-2"><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "resolved" } }).then(reload)} className="rounded-lg bg-link px-3 py-1.5 text-xs font-semibold text-white">Resolve</button><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "rejected" } }).then(reload)} className="rounded-lg bg-field px-3 py-1.5 text-xs font-semibold">Reject</button></div>}</div>)}
+          {!data.reports.length && <p className="px-4 py-8 text-center text-sm text-muted">No reports yet.</p>}
+        </div>
+      </section>
       <section className="mt-6 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center gap-2 font-semibold"><Mail size={18} />Email delivery</div><p className="mb-3 text-sm text-muted">Send a test through the configured Yandex SMTP mailbox.</p><div className="flex flex-col gap-2 sm:flex-row"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Recipient (empty = your account email)" className="min-w-0 flex-1 rounded-lg bg-field px-3 py-2 outline-none" /><PrimaryButton type="button" onClick={() => void testMail()}>Send test</PrimaryButton></div>{mailStatus && <p className="mt-3 text-sm text-muted">{mailStatus}</p>}</section>
       {server.data && <section className="mt-6 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center justify-between"><div className="flex items-center gap-2 font-semibold"><ShieldCheck size={18} />Server status</div><span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">{server.data.status.toUpperCase()}</span></div><div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4"><div><div className="text-muted">Environment</div><div className="font-semibold">{server.data.environment}</div></div><div><div className="text-muted">Node</div><div className="font-semibold">{server.data.node}</div></div><div><div className="text-muted">Uptime</div><div className="font-semibold">{Math.floor(server.data.uptimeSeconds / 60)} min</div></div><div><div className="text-muted">Database</div><div className="font-semibold">{server.data.database.users} users · {server.data.database.conversations} chats</div></div></div><div className="mt-4 flex flex-wrap gap-2 text-xs"><span className={`rounded-full px-2 py-1 ${server.data.integrations.smtp ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>SMTP {server.data.integrations.smtp ? "ready" : "off"}</span><span className={`rounded-full px-2 py-1 ${server.data.integrations.push ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>Push {server.data.integrations.push ? "ready" : "off"}</span></div></section>}
     </div>

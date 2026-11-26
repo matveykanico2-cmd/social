@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
-import { Bookmark, Camera, ChevronDown, ChevronLeft, Clapperboard, Gift, Grid3x3, Menu, MoreHorizontal, Pin, Settings, SquarePlus, UserPlus } from "lucide-react";
+import { Ban, Bookmark, Camera, ChevronDown, ChevronLeft, Clapperboard, Flag, Gift, Grid3x3, Menu, MoreHorizontal, Pin, Settings, SquarePlus, UserPlus } from "lucide-react";
 import { api, compact, useApi, useOnCreated } from "@/lib/client";
 import type { Post, Profile } from "@/lib/types";
 import { useApp } from "@/components/app-context";
 import { PostGrid } from "@/components/post-view";
 import { HighlightsRow } from "@/components/highlights";
 import { FollowButton, RichText, UserListModal } from "@/components/social";
-import { Avatar, SecondaryButton, Spinner, Verified } from "@/components/ui";
+import { Avatar, Modal, SecondaryButton, Spinner, Verified } from "@/components/ui";
 
 type Tab = "posts" | "reels" | "saved";
 
@@ -84,6 +84,7 @@ function ProfileContent() {
   const postsReq = useApi<{ posts: Post[] }>(profileReq.data && username ? `/api/users/${encodeURIComponent(username)}/posts?tab=${tab}` : null);
   const giftsReq = useApi<{ gifts: { id: number; name: string; emoji: string; price: number; pinned: boolean; createdAt: number; senderUsername: string }[] }>(profileReq.data && username ? `/api/users/${encodeURIComponent(username)}/gifts` : null);
   const [list, setList] = useState<"followers" | "following" | "mutual" | null>(null);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   const { reload: reloadProfile } = profileReq;
   const { reload: reloadPosts } = postsReq;
@@ -149,6 +150,25 @@ function ProfileContent() {
     }
   };
 
+  const blockProfile = async () => {
+    if (!window.confirm(`Block @${p.username}?`)) return;
+    try {
+      await api(`/api/users/${encodeURIComponent(p.username)}/block`, { method: "POST" });
+      toast(`@${p.username} blocked.`);
+      router.back();
+    } catch (e) { toast((e as Error).message); }
+  };
+
+  const reportProfile = async () => {
+    const reason = window.prompt("Why are you reporting this profile?");
+    if (!reason?.trim()) return;
+    try {
+      await api("/api/reports", { body: { targetType: "user", targetId: p.id, reason } });
+      setOptionsOpen(false);
+      toast("Report sent to moderation.");
+    } catch (e) { toast((e as Error).message); }
+  };
+
   const avatar = (size: number) =>
     p.hasStory ? (
       <Link href={`/stories/${p.username}`}>
@@ -201,7 +221,7 @@ function ProfileContent() {
             <span className="truncate">{p.username}</span>
             {p.verified && <Verified size={14} />}
           </h1>
-          <button onClick={shareProfile} aria-label="Options">
+          <button onClick={() => setOptionsOpen(true)} aria-label="Options">
             <MoreHorizontal size={24} />
           </button>
         </header>
@@ -359,6 +379,7 @@ function ProfileContent() {
           }}
         />
       )}
+      {optionsOpen && !p.isMe && <Modal onClose={() => setOptionsOpen(false)} showClose={false} className="w-[360px] max-w-full"><div className="flex flex-col"><button type="button" onClick={() => void blockProfile()} className="flex items-center gap-3 px-5 py-4 text-left font-semibold text-danger"><Ban size={18} />Block @{p.username}</button><button type="button" onClick={() => void reportProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left font-semibold"><Flag size={18} />Report profile</button><button type="button" onClick={() => void shareProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left"><MoreHorizontal size={18} />Copy profile link</button><button type="button" onClick={() => setOptionsOpen(false)} className="border-t border-border px-5 py-4 text-left text-muted">Cancel</button></div></Modal>}
     </div>
   );
 }

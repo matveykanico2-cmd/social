@@ -7,6 +7,7 @@ import type { InvoiceCard, Message, MessageKind, UserLite } from "@/lib/types";
 
 /** Returns the 1:1 conversation between two users, creating it if needed. */
 export function conversationBetween(a: number, b: number): number {
+  if (get("SELECT 1 FROM user_blocks WHERE (blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)", a, b, b, a)) throw new HttpError(403, "This user is unavailable.");
   const existing = get<{ id: number }>(
     `SELECT c.id FROM conversations c
      JOIN conversation_members x ON x.conversation_id = c.id AND x.user_id = ?
