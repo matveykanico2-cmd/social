@@ -21,6 +21,7 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const coverInput = useRef<HTMLInputElement>(null);
 
   const changed = (Object.keys(form) as (keyof typeof form)[]).some((k) => form[k] !== me[k]) || Object.keys(privacy).some((k) => privacy[k as keyof typeof privacy] !== me[k as keyof typeof me]);
 
@@ -57,6 +58,13 @@ export default function EditProfilePage() {
     } catch (err) {
       toast((err as Error).message);
     }
+  };
+
+  const uploadCover = async (file: File | undefined) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("cover", file);
+    try { await send(fd); toast("Profile cover added."); } catch (err) { toast((err as Error).message); }
   };
 
   const changePassword = async () => {
@@ -144,6 +152,11 @@ export default function EditProfilePage() {
             e.target.value = "";
           }}
         />
+      </div>
+      <div className="mb-8 rounded-2xl border border-border p-4">
+        <div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="font-bold">Profile cover</h2><p className="text-sm text-muted">A wide image shown behind your profile on desktop and mobile.</p></div><PrimaryButton type="button" onClick={() => coverInput.current?.click()}>Change cover</PrimaryButton></div>
+        <div className="h-24 overflow-hidden rounded-xl bg-[linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)] bg-cover bg-center" style={me.cover ? { backgroundImage: `url(${me.cover})` } : undefined} />
+        <input ref={coverInput} hidden type="file" accept="image/*" onChange={(event) => { void uploadCover(event.target.files?.[0]); event.target.value = ""; }} />
       </div>
 
       <form onSubmit={save} className="space-y-6">

@@ -10,6 +10,7 @@ const toMe = (u: UserRow): Me => ({
   name: u.name,
   lastName: u.last_name,
   avatar: u.avatar,
+  cover: u.cover,
   verified: !!u.verified,
   email: u.email,
   phone: u.phone,
@@ -25,7 +26,7 @@ export const GET = route(async () => {
   return { user: user ? toMe(user) : null };
 });
 
-// Edit profile. Multipart form: name, username, bio, website, email, avatar (file), removeAvatar.
+// Edit profile. Multipart form: name, username, bio, website, email, avatar/cover files.
 export const PATCH = route(async (req) => {
   const me = await requireUser();
   const form = await req.formData();
@@ -53,6 +54,7 @@ export const PATCH = route(async (req) => {
     throw new HttpError(409, "Another account is using the same phone number.");
 
   let avatar = me.avatar;
+  let cover = me.cover;
   const file = form.get("avatar");
   if (file instanceof File && file.size > 0) {
     avatar = (await saveUpload(file, "image")).url;
@@ -61,9 +63,15 @@ export const PATCH = route(async (req) => {
     await deleteUpload(me.avatar);
     avatar = null;
   }
+  const coverFile = form.get("cover");
+  if (coverFile instanceof File && coverFile.size > 0) cover = (await saveUpload(coverFile, "image")).url;
+  else if (form.get("removeCover") === "1") {
+    await deleteUpload(me.cover);
+    cover = null;
+  }
 
   run(
-    "UPDATE users SET username = ?, name = ?, last_name = ?, bio = ?, website = ?, email = ?, phone = ?, avatar = ?, private_account = ?, show_activity = ?, allow_messages = ? WHERE id = ?",
+    "UPDATE users SET username = ?, name = ?, last_name = ?, bio = ?, website = ?, email = ?, phone = ?, avatar = ?, cover = ?, private_account = ?, show_activity = ?, allow_messages = ? WHERE id = ?",
     username,
     name,
     lastName,
@@ -72,6 +80,7 @@ export const PATCH = route(async (req) => {
     email,
     phone || null,
     avatar,
+    cover,
     privateAccount ? 1 : 0,
     showActivity ? 1 : 0,
     allowMessages ? 1 : 0,

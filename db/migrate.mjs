@@ -36,6 +36,7 @@ const ADDED_COLUMNS = [
   ["users", "private_account", "INTEGER NOT NULL DEFAULT 0"],
   ["users", "show_activity", "INTEGER NOT NULL DEFAULT 1"],
   ["users", "allow_messages", "INTEGER NOT NULL DEFAULT 1"],
+  ["users", "cover", "TEXT"],
   ["conversations", "is_seed", "INTEGER NOT NULL DEFAULT 0"],
   ["conversations", "kind", "TEXT NOT NULL DEFAULT 'direct'"],
   ["conversations", "title", "TEXT"],

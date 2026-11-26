@@ -13,6 +13,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     name: string;
     last_name: string;
     avatar: string | null;
+    cover: string | null;
     verified: number;
     bio: string;
     website: string;
@@ -25,7 +26,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     is_business: number;
     business_category: string;
   }>(
-    `SELECT u.id, u.username, u.name, u.last_name, u.avatar, u.verified, u.bio, u.website, u.is_business, u.business_category,
+    `SELECT u.id, u.username, u.name, u.last_name, u.avatar, u.cover, u.verified, u.bio, u.website, u.is_business, u.business_category,
        (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
        u.imported_follower_count + (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS follower_count,
        u.imported_following_count + (SELECT COUNT(*) FROM follows WHERE follower_id = u.id) AS following_count,
@@ -59,6 +60,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     name: r.name,
     lastName: r.last_name,
     avatar: r.avatar,
+    cover: r.cover,
     verified: !!r.verified,
     bio: r.bio,
     website: r.website,

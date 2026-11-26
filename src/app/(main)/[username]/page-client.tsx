@@ -229,7 +229,7 @@ function ProfileContent() {
 
       {/* Desktop header */}
       <section className="vk-card mb-6 hidden overflow-hidden md:block">
-        <div className="h-[150px] bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.4),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)]" />
+        <div className="h-[150px] bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.4),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)] bg-cover bg-center" style={p.cover ? { backgroundImage: `url(${p.cover})` } : undefined} />
         <div className="flex items-start px-7 pb-7">
           <div className="-mt-20 flex w-[220px] shrink-0 justify-center pr-7">{avatar(150)}</div>
           <div className="min-w-0 flex-1 pt-5">
@@ -271,7 +271,7 @@ function ProfileContent() {
 
       {/* Mobile profile: compact cover, overlapping avatar and VK-style action block. */}
       <section className="vk-card mb-4 overflow-hidden md:hidden">
-        <div className="h-24 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.42),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)]" />
+        <div className="h-24 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.42),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)] bg-cover bg-center" style={p.cover ? { backgroundImage: `url(${p.cover})` } : undefined} />
         <div className="-mt-9 px-4 pb-4">
           <div className="flex items-end gap-4">
             {avatar(86)}

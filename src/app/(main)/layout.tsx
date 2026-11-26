@@ -14,6 +14,7 @@ export default async function MainLayout({ children }: LayoutProps<"/">) {
     name: user.name,
     lastName: user.last_name,
     avatar: user.avatar,
+    cover: user.cover,
     verified: !!user.verified,
     email: user.email,
     phone: user.phone,

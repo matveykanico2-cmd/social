@@ -12,7 +12,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 |---|---|---:|---|
 | admin | `src/app/api/admin/*`, `src/app/(main)/admin` | partial | Users, posts, server health, verification and reports work; donor audit tools remain. |
 | ads, promotions, donation-alerts, partners | — | todo | Need billing/placement model before production use. |
-| auth, sessions, profiles, users, usernames | `src/lib/server/auth.ts`, `src/app/api/auth/*`, `src/app/api/users/*` | partial | Unified cookie sessions, password recovery, multi-account and profiles work; donor OAuth/passkeys/2FA remain. |
+| auth, sessions, profiles, users, usernames | `src/lib/server/auth.ts`, `src/app/api/auth/*`, `src/app/api/users/*` | partial | Unified cookie sessions, password recovery, multi-account, profiles and uploaded profile covers work; donor OAuth/passkeys/2FA remain. |
 | background | — | todo | Requires worker process and job ownership model. |
 | bootstrap, common, db | `src/lib/server/db.ts`, `db/schema.sql`, `db/migrate.mjs` | partial | Safe SQLite migrations exist; donor PostgreSQL/worker-specific adapters remain. |
 | bots | `src/app/api/bots/*`, `src/app/(main)/bots` | partial | Bot CRUD, avatars, commands and webhook work; full donor Bot API/Mini Apps remain. |
