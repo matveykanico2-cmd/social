@@ -2,6 +2,7 @@ import { route, intParam, jsonBody, HttpError } from "@/lib/server/http";
 import { get, run } from "@/lib/server/db";
 import { requireUser } from "@/lib/server/auth";
 import { conversationDetails, loadMessages, messageIds, otherLastRead, otherMember, sendMessage, sendCallMessage, sendPoll, sendStickerMessage } from "@/lib/server/dm";
+import { publishConversation } from "@/lib/server/realtime";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -37,15 +38,21 @@ export const POST = route(async (req, { params }: Ctx) => {
   if (channel?.kind === "channel" && channel.owner_id !== me.id) throw new HttpError(403, "Only the channel owner can publish updates.");
   if (body.callType === "audio" || body.callType === "video") {
     const messageId = sendCallMessage(id, me.id, body.callType);
-    return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
+    const message = loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId);
+    publishConversation(id, { type: "message", messageId });
+    return { message };
   }
   if (body.poll) {
     const messageId = sendPoll(id, me.id, String(body.poll.question ?? ""), Array.isArray(body.poll.options) ? body.poll.options.map(String) : []);
-    return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
+    const message = loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId);
+    publishConversation(id, { type: "message", messageId });
+    return { message };
   }
   if (body.sticker) {
     const messageId = sendStickerMessage(id, me.id, String(body.sticker));
-    return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
+    const message = loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId);
+    publishConversation(id, { type: "message", messageId });
+    return { message };
   }
   const text = String(body.text ?? "").trim().slice(0, 1000);
   if (!text) throw new HttpError(400, "Write a message first.");
@@ -56,5 +63,7 @@ export const POST = route(async (req, { params }: Ctx) => {
     const linked = get<{ linked_conversation_id: number | null }>("SELECT linked_conversation_id FROM conversations WHERE id = ?", id)?.linked_conversation_id;
     if (linked) sendMessage(linked, me.id, text, null, null);
   }
-  return { message: loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId) };
+  const message = loadMessages(id, messageId - 1, me.id).find((m) => m.id === messageId);
+  publishConversation(id, { type: "message", messageId });
+  return { message };
 });

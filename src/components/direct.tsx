@@ -430,10 +430,16 @@ function Thread({ id }: { id: number }) {
       }
     };
     poll();
-    const t = setInterval(poll, 2000);
+    // SSE delivers new messages immediately; this slower reconciliation pass
+    // recovers events after a tab sleep, server restart, or dropped stream.
+    const events = new EventSource(`/api/conversations/${id}/events`);
+    events.addEventListener("message", () => void poll());
+    events.addEventListener("sync", () => void poll());
+    const t = setInterval(poll, 10000);
     return () => {
       stop = true;
       clearInterval(t);
+      events.close();
     };
   }, [id, me.id, refreshUnread, retry]);
 
