@@ -269,32 +269,26 @@ function ProfileContent() {
         </div>
       </section>
 
-      {/* Phone header, like the Instagram app: photo + counts, then name and bio, then buttons */}
-      <section className="md:hidden">
-        <div className="flex items-center gap-6 px-4 pt-2">
-          {avatar(86)}
-          <div className="flex min-w-0 flex-1 justify-between">
-            <PhoneStat n={p.postCount} label={p.postCount === 1 ? "post" : "posts"} />
-            <PhoneStat n={p.followerCount} label={p.followerCount === 1 ? "follower" : "followers"} onClick={() => setList("followers")} />
-            <PhoneStat n={p.followingCount} label="following" onClick={() => setList("following")} />
-          </div>
-        </div>
-        <div className="px-4 pt-3">
-          {(p.name || p.lastName) && <div className="font-semibold">{[p.name, p.lastName].filter(Boolean).join(" ")}</div>}
-          {p.isBusiness && p.businessCategory && <div className="text-muted">{p.businessCategory}</div>}
-          {p.bio && (
-            <div className="whitespace-pre-line">
-              <RichText text={p.bio} />
+      {/* Mobile profile: compact cover, overlapping avatar and VK-style action block. */}
+      <section className="vk-card mb-4 overflow-hidden md:hidden">
+        <div className="h-24 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,.42),transparent_28%),linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)]" />
+        <div className="-mt-9 px-4 pb-4">
+          <div className="flex items-end gap-4">
+            {avatar(86)}
+            <div className="flex min-w-0 flex-1 justify-around pb-1">
+              <PhoneStat n={p.postCount} label={p.postCount === 1 ? "post" : "posts"} />
+              <PhoneStat n={p.followerCount} label={p.followerCount === 1 ? "follower" : "followers"} onClick={() => setList("followers")} />
+              <PhoneStat n={p.followingCount} label="following" onClick={() => setList("following")} />
             </div>
-          )}
-          {p.website && (
-            <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" className="font-semibold text-link-text">
-              {p.website.replace(/^https?:\/\//, "")}
-            </a>
-          )}
-          <FollowedBy profile={p} onOpen={() => setList("mutual")} />
-        </div>
-        <div className="flex gap-1.5 px-4 pb-1 pt-3">
+          </div>
+          <div className="pt-3">
+            <div className="flex items-center gap-1 font-bold">{[p.name, p.lastName].filter(Boolean).join(" ") || p.username}{p.verified && <Verified size={15} />}</div>
+            {p.isBusiness && p.businessCategory && <div className="text-muted">{p.businessCategory}</div>}
+            {p.bio && <div className="whitespace-pre-line"><RichText text={p.bio} /></div>}
+            {p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" className="font-semibold text-link-text">{p.website.replace(/^https?:\/\//, "")}</a>}
+            <FollowedBy profile={p} onOpen={() => setList("mutual")} />
+          </div>
+          <div className="flex gap-2 pt-4">
           {p.isMe ? (
             <>
               <SecondaryButton onClick={() => router.push("/accounts/edit")} className="flex-1">
@@ -310,6 +304,7 @@ function ProfileContent() {
           ) : (
             buttons
           )}
+          </div>
         </div>
       </section>
 

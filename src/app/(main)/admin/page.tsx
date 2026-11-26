@@ -66,16 +66,16 @@ export default function AdminPage() {
         <div><h1 className="text-2xl font-bold">Admin panel</h1><p className="text-muted">Manage users, content and activity</p></div>
       </div>
       <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {cards.map(([Icon, label, value]) => <div key={label} className="rounded-xl border border-border bg-elevated p-4"><Icon size={20} className="text-muted" /><div className="mt-3 text-2xl font-bold">{value}</div><div className="text-sm text-muted">{label}</div></div>)}
+        {cards.map(([Icon, label, value]) => <div key={label} className="vk-card p-4"><Icon size={20} className="text-muted" /><div className="mt-3 text-2xl font-bold">{value}</div><div className="text-sm text-muted">{label}</div></div>)}
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-elevated">
+        <section className="vk-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="font-semibold">Users</h2><UserCheck size={18} className="text-muted" /></div>
           <div className="divide-y divide-border">
             {data.users.map((user) => <div key={user.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-1 truncate font-semibold">@{user.username} {user.verified ? <Verified size={14} /> : null}</div><div className="truncate text-xs text-muted">{user.name || "No name"} · {date(user.created_at)}</div></div>{user.phone && <span className="hidden text-xs text-muted sm:block">{user.phone}</span>}<button onClick={() => void toggleVerified(user)} aria-label={user.verified ? `Remove verification from ${user.username}` : `Verify ${user.username}`} title={user.verified ? "Remove verification" : "Verify account"} className={`rounded-lg px-2 py-1 text-xs font-semibold ${user.verified ? "bg-link/10 text-link" : "bg-field text-muted hover:text-fg"}`}>{user.verified ? "Verified" : "Verify"}</button><button onClick={() => void removeUser(user.id, user.username)} aria-label={`Delete ${user.username}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
           </div>
         </section>
-        <section className="rounded-xl border border-border bg-elevated">
+        <section className="vk-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="font-semibold">Recent posts</h2><ImageIcon size={18} className="text-muted" /></div>
           <div className="divide-y divide-border">
             {data.posts.map((post) => <div key={post.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="font-semibold">@{post.username} <span className="font-normal text-muted">· {post.type}</span></div><div className="truncate text-sm text-muted">{post.caption || "No caption"}</div></div><button onClick={() => removePost(post.id)} aria-label={`Delete post ${post.id}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
@@ -83,7 +83,7 @@ export default function AdminPage() {
         </section>
       </div>
       <div className="mt-6"><PrimaryButton type="button" onClick={reload}>Refresh</PrimaryButton></div>
-      <section className="mt-6 rounded-xl border border-border bg-elevated">
+      <section className="vk-card mt-6 overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold"><Flag size={18} />Moderation reports</h2><span className="text-xs text-muted">{data.stats.reports} open</span></div>
         <div className="divide-y divide-border">
           {data.reports.map((report) => <div key={report.id} className="flex flex-wrap items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="font-semibold">{report.target_type} #{report.target_id} <span className="font-normal text-muted">by @{report.reporter}</span></div><div className="truncate text-sm text-muted">{report.reason}</div></div><span className="rounded-full bg-field px-2 py-1 text-xs text-muted">{report.status}</span>{report.status === "open" && <div className="flex gap-2"><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "resolved" } }).then(reload)} className="rounded-lg bg-link px-3 py-1.5 text-xs font-semibold text-white">Resolve</button><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "rejected" } }).then(reload)} className="rounded-lg bg-field px-3 py-1.5 text-xs font-semibold">Reject</button></div>}</div>)}
