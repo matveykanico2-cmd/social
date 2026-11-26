@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS posts (
   type TEXT NOT NULL DEFAULT 'post', -- 'post' | 'reel'
   caption TEXT NOT NULL DEFAULT '',
   location TEXT NOT NULL DEFAULT '',
+  archived_at INTEGER,
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS posts_user ON posts(user_id, id);

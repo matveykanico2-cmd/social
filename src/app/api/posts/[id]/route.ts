@@ -17,11 +17,14 @@ export const GET = route(async (_req, { params }: Ctx) => {
 export const PATCH = route(async (req, { params }: Ctx) => {
   const me = await requireUser();
   const id = intParam((await params).id);
-  const body = (await req.json()) as { caption?: string; location?: string };
+  const body = (await req.json()) as { caption?: string; location?: string; archived?: boolean };
   const { changes } = run(
-    "UPDATE posts SET caption = COALESCE(?, caption), location = COALESCE(?, location) WHERE id = ? AND user_id = ?",
+    "UPDATE posts SET caption = COALESCE(?, caption), location = COALESCE(?, location), archived_at = CASE WHEN ? IS NULL THEN archived_at WHEN ? = 1 THEN ? ELSE NULL END WHERE id = ? AND user_id = ?",
     body.caption?.slice(0, 2200) ?? null,
     body.location?.slice(0, 100) ?? null,
+    body.archived === undefined ? null : body.archived ? 1 : 0,
+    body.archived === undefined ? null : body.archived ? 1 : 0,
+    body.archived ? Date.now() : null,
     id,
     me.id,
   );

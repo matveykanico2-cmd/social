@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/server/auth";
 import { queryPosts } from "@/lib/server/queries";
 import { userIdByUsername } from "@/lib/server/users";
 
-// ?tab=posts (everything) | reels | saved (only for yourself)
+// ?tab=posts | reels | archived | saved (only for yourself)
 export const GET = route(async (req, { params }: { params: Promise<{ username: string }> }) => {
   const me = await requireUser();
   const id = userIdByUsername((await params).username);
@@ -20,6 +20,10 @@ export const GET = route(async (req, { params }: { params: Promise<{ username: s
       ),
     };
   }
-  const where = tab === "reels" ? "p.user_id = ? AND p.type = 'reel'" : "p.user_id = ?";
+  if (tab === "archived") {
+    if (id !== me.id) throw new HttpError(403, "Only you can see your archive.");
+    return { posts: queryPosts(me.id, "p.user_id = ? AND p.archived_at IS NOT NULL", [id], "ORDER BY p.archived_at DESC") };
+  }
+  const where = tab === "reels" ? "p.user_id = ? AND p.type = 'reel' AND p.archived_at IS NULL" : "p.user_id = ? AND p.archived_at IS NULL";
   return { posts: queryPosts(me.id, where, [id], "ORDER BY p.id DESC") };
 });

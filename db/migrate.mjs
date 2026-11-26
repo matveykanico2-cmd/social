@@ -38,6 +38,7 @@ const ADDED_COLUMNS = [
   ["users", "allow_messages", "INTEGER NOT NULL DEFAULT 1"],
   ["users", "cover", "TEXT"],
   ["users", "last_seen_at", "INTEGER"],
+  ["posts", "archived_at", "INTEGER"],
   ["comments", "attachment_url", "TEXT"],
   ["comments", "attachment_kind", "TEXT"],
   ["comments", "parent_id", "INTEGER REFERENCES comments(id) ON DELETE SET NULL"],

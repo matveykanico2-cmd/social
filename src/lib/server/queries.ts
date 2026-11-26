@@ -20,6 +20,7 @@ type PostRow = UserCols & {
   type: "post" | "reel";
   caption: string;
   location: string;
+  archived_at: number | null;
   created_at: number;
   like_count: number;
   comment_count: number;
@@ -35,7 +36,7 @@ type PostRow = UserCols & {
  */
 export function queryPosts(viewerId: number, where: string, params: SQLInputValue[], tail: string): Post[] {
   const rows = all<PostRow>(
-    `SELECT p.id, p.type, p.caption, p.location, p.created_at,
+    `SELECT p.id, p.type, p.caption, p.location, p.archived_at, p.created_at,
        u.id AS uid, u.username, u.name, u.avatar, u.verified,
        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS comment_count,
@@ -69,6 +70,7 @@ export function queryPosts(viewerId: number, where: string, params: SQLInputValu
     type: r.type,
     caption: r.caption,
     location: r.location,
+    archived: !!r.archived_at,
     createdAt: r.created_at,
     user: { ...userLite(r), isFollowing: !!r.is_following },
     media: byPost.get(r.id) ?? [],

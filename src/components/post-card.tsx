@@ -95,6 +95,7 @@ export function PostMenu({
         } catch (error) { toast((error as Error).message); }
       },
     }] : []),
+    ...(mine ? [{ label: post.archived ? "Restore post" : "Archive post", onClick: async () => { const result = await api<{ post: Post }>(`/api/posts/${post.id}`, { method: "PATCH", body: { archived: !post.archived } }); onChanged?.(result.post); toast(post.archived ? "Post restored." : "Post archived."); onClose(); } }] : []),
     ...(mine ? [{ label: "Delete", danger: true, onClick: () => setConfirmDelete(true) }] : []),
     ...(!mine && post.user.isFollowing
       ? [
@@ -239,7 +240,7 @@ export function PostCard({ post: initial, onRemove }: { post: Post; onRemove: (i
           onClose={() => setMenu(false)}
           onDeleted={() => onRemove(post.id)}
           onUnfollow={() => setPost((p) => ({ ...p, user: { ...p.user, isFollowing: false } }))}
-          onChanged={setPost}
+          onChanged={(updated) => (updated.archived ? onRemove(updated.id) : setPost(updated))}
         />
       )}
       {showLikes && <UserListModal title="Likes" url={`/api/posts/${post.id}/likes`} onClose={() => setShowLikes(false)} />}

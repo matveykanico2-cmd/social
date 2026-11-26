@@ -12,7 +12,7 @@ import { HighlightsRow } from "@/components/highlights";
 import { FollowButton, RichText, UserListModal } from "@/components/social";
 import { Avatar, Modal, SecondaryButton, Spinner, Verified } from "@/components/ui";
 
-type Tab = "posts" | "reels" | "saved";
+type Tab = "posts" | "reels" | "saved" | "archived";
 
 function FriendButton({ username, status, onChange }: { username: string; status: Profile["friendStatus"]; onChange: (status: Profile["friendStatus"]) => void }) {
   const { toast } = useApp();
@@ -203,6 +203,7 @@ function ProfileContent() {
     { id: "posts", label: "Posts", icon: <Grid3x3 size={12} strokeWidth={2.5} /> },
     { id: "reels", label: "Reels", icon: <Clapperboard size={12} strokeWidth={2.5} /> },
     ...(p.isMe ? [{ id: "saved" as Tab, label: "Saved", icon: <Bookmark size={12} strokeWidth={2.5} /> }] : []),
+    ...(p.isMe ? [{ id: "archived" as Tab, label: "Archive", icon: <Bookmark size={12} strokeWidth={2.5} /> }] : []),
   ];
 
   const posts = postsReq.data?.posts;
@@ -358,19 +359,21 @@ function ProfileContent() {
       ) : posts.length === 0 ? (
         <div className="flex flex-col items-center px-8 py-16 text-center">
           <span className="mb-4 rounded-full border-2 border-fg p-4">
-            {tab === "saved" ? <Bookmark size={34} strokeWidth={1.5} /> : tab === "reels" ? <Clapperboard size={34} strokeWidth={1.5} /> : <Camera size={34} strokeWidth={1.5} />}
+            {tab === "saved" || tab === "archived" ? <Bookmark size={34} strokeWidth={1.5} /> : tab === "reels" ? <Clapperboard size={34} strokeWidth={1.5} /> : <Camera size={34} strokeWidth={1.5} />}
           </span>
           <h3 className="text-3xl font-extrabold">
-            {tab === "saved" ? "Save" : tab === "reels" ? (p.isMe ? "Share a moment with the world" : "No reels yet") : p.isMe ? "Share Photos" : "No Posts Yet"}
+            {tab === "saved" ? "Save" : tab === "archived" ? "No archived posts" : tab === "reels" ? (p.isMe ? "Share a moment with the world" : "No reels yet") : p.isMe ? "Share Photos" : "No Posts Yet"}
           </h3>
           <p className="mt-3 max-w-[350px]">
             {tab === "saved"
               ? "Save photos and videos that you want to see again. No one is notified, and only you can see what you've saved."
+              : tab === "archived"
+                ? "Archived posts are visible only to you."
               : p.isMe
                 ? "When you share photos, they will appear on your profile."
                 : ""}
           </p>
-          {p.isMe && tab !== "saved" && (
+          {p.isMe && tab !== "saved" && tab !== "archived" && (
             <button onClick={() => setCreateOpen(true)} className="mt-4 font-semibold text-link hover:text-link-text">
               {tab === "reels" ? "Create your first reel" : "Share your first photo"}
             </button>

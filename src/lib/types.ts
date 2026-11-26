@@ -19,6 +19,7 @@ export type Post = {
   type: "post" | "reel";
   caption: string;
   location: string;
+  archived: boolean;
   createdAt: number;
   user: UserLite & { isFollowing: boolean };
   media: Media[];
