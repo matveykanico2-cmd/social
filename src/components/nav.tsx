@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type Re
 import {
   Bookmark,
   Clapperboard,
-  Compass,
   Heart,
   House,
   Menu,
@@ -27,6 +26,10 @@ import {
   Users,
   Radio,
   Bot,
+  Bell,
+  Gift,
+  UserRound,
+  Video,
 } from "lucide-react";
 import { api, BASE_PATH } from "@/lib/client";
 import { useApp } from "./app-context";
@@ -181,6 +184,25 @@ function MoreMenu({ onClose, mobile = false }: { onClose: () => void; mobile?: b
   );
 }
 
+/** Persistent desktop header: compact VK-style global navigation and search. */
+export function TopBar() {
+  const { me, unread } = useApp();
+  return (
+    <header className="vk-topbar fixed left-0 right-0 top-0 z-30 hidden h-16 items-center border-b border-separator pl-[88px] pr-6 md:flex xl:pl-[260px]">
+      <Link href="/" className="mr-6 shrink-0" aria-label="Shalter home"><Logo className="text-[27px]" /></Link>
+      <Link href="/explore" className="flex h-10 min-w-0 max-w-[430px] flex-1 items-center gap-2 rounded-lg bg-field px-3 text-muted hover:bg-secondary-hover" aria-label="Search">
+        <Search size={18} />
+        <span>Search people, communities and posts</span>
+      </Link>
+      <div className="ml-auto flex items-center gap-1 pl-5">
+        <Link href="/notifications" className="relative rounded-lg p-2.5 hover:bg-hover" aria-label="Notifications"><Bell size={21} /><Dot show={unread.notifications > 0} /></Link>
+        <Link href="/direct/inbox" className="relative rounded-lg p-2.5 hover:bg-hover" aria-label="Messages"><Send size={21} /><Badge count={unread.messages} /></Link>
+        <Link href={`/${me.username}`} className="ml-2 flex items-center gap-2 rounded-lg p-1.5 pr-3 hover:bg-hover"><Avatar src={me.avatar} size={32} /><span className="hidden max-w-[130px] truncate text-sm font-semibold lg:block">{me.name || me.username}</span></Link>
+      </div>
+    </header>
+  );
+}
+
 export function Sidebar() {
   const { me, unread, setCreateOpen } = useApp();
   const pathname = usePathname();
@@ -204,30 +226,24 @@ export function Sidebar() {
   const is = (p: string) => !panel && (p === "/" ? pathname === "/" : pathname.startsWith(p));
 
   const items: { label: string; icon: (active: boolean) => ReactNode; href?: string; onClick?: () => void; active: boolean }[] = [
-    { label: "Home", href: "/", active: is("/"), icon: (a) => <House size={26} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "My page", href: `/${me.username}`, active: is(`/${me.username}`), icon: (a) => <UserRound size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "News", href: "/", active: is("/"), icon: (a) => <House size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Search",
       onClick: () => setPanel((p) => (p === "search" ? null : "search")),
       active: panel === "search",
       icon: (a) => <Search size={26} strokeWidth={a ? 2.8 : 1.8} />,
     },
-    { label: "Explore", href: "/explore", active: is("/explore"), icon: (a) => <Compass size={26} strokeWidth={a ? 2.6 : 1.8} /> },
-    { label: "Reels", href: "/reels", active: is("/reels"), icon: (a) => <Clapperboard size={26} strokeWidth={a ? 2.6 : 1.8} /> },
-    {
-      label: "Messages",
-      href: "/direct/inbox",
-      active: is("/direct"),
-      icon: (a) => (
-        <span className="relative">
-          <Send size={26} strokeWidth={a ? 2.6 : 1.8} />
-          <Badge count={unread.messages} />
-        </span>
-      ),
-    },
-    { label: "Communities", href: "/communities", active: is("/communities"), icon: (a) => <Users size={26} strokeWidth={a ? 2.6 : 1.8} /> },
-    { label: "Channels", href: "/channels", active: is("/channels"), icon: (a) => <Aperture size={26} strokeWidth={a ? 2.6 : 1.8} /> },
-    { label: "Live", href: "/live", active: is("/live"), icon: (a) => <Radio size={26} strokeWidth={a ? 2.6 : 1.8} className={a ? "text-danger" : ""} /> },
-    { label: "Bots", href: "/bots", active: is("/bots"), icon: (a) => <Bot size={26} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Friends", href: "/explore/people", active: is("/explore/people"), icon: (a) => <Users size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Communities", href: "/communities", active: is("/communities"), icon: (a) => <Users size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Messenger", href: "/direct/inbox", active: is("/direct"), icon: (a) => <Send size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Photos", href: "/explore", active: is("/explore"), icon: (a) => <Aperture size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Video", href: "/reels", active: is("/reels"), icon: (a) => <Video size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Clips", href: "/reels", active: is("/reels"), icon: (a) => <Clapperboard size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Channels", href: "/channels", active: is("/channels"), icon: (a) => <Aperture size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Live", href: "/live", active: is("/live"), icon: (a) => <Radio size={25} strokeWidth={a ? 2.6 : 1.8} className={a ? "text-danger" : ""} /> },
+    { label: "Gifts", href: `/${me.username}?tab=gifts`, active: false, icon: (a) => <Gift size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Bots", href: "/bots", active: is("/bots"), icon: (a) => <Bot size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Notifications",
       onClick: () => setPanel((p) => (p === "notifications" ? null : "notifications")),
@@ -279,7 +295,7 @@ export function Sidebar() {
                 {label(it.label, it.active)}
               </>
             );
-            const cls = "group flex items-center gap-4 rounded-lg p-3 hover:bg-hover";
+            const cls = "group flex items-center gap-4 rounded-lg p-2.5 hover:bg-hover";
             return it.href ? (
               <Link key={it.label} href={it.href} className={cls} title={it.label}>
                 {inner}

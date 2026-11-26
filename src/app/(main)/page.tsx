@@ -130,12 +130,12 @@ export default function HomePage() {
   return (
     <>
       <MobileHomeHeader />
-      <div className="flex justify-center md:px-4">
-        <div className="w-full max-w-[630px] md:pt-4">
-          <div className="mx-auto max-w-[470px] md:max-w-[630px]">
+      <div className="flex justify-center gap-5 md:px-4">
+        <div className="w-full max-w-[700px] md:pt-5">
+          <div className="vk-card mx-auto mb-4 max-w-[470px] px-4 py-3 md:max-w-[700px]">
             <StoriesBar />
           </div>
-          <div className="mx-auto max-w-[470px]">
+          <div className="mx-auto max-w-[700px]">
             {posts.map((p) => (
               <PostCard key={p.id} post={p} onRemove={(id) => setPosts((ps) => ps.filter((x) => x.id !== id))} />
             ))}
@@ -146,7 +146,7 @@ export default function HomePage() {
               </div>
             )}
             {feedError && !loading && (
-              <div className="mx-3 my-8 rounded-xl border border-border bg-secondary/40 px-5 py-6 text-center">
+              <div className="vk-card mx-3 my-8 px-5 py-6 text-center">
                 <h2 className="text-base font-semibold">Your feed couldn&apos;t load</h2>
                 <p className="mt-1 text-muted">Check your connection and try again.</p>
                 <button

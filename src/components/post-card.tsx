@@ -130,7 +130,7 @@ export function PostCard({ post: initial, onRemove }: { post: Post; onRemove: (i
   };
 
   return (
-    <article className="mb-5 border-b border-separator pb-5 md:mb-4">
+    <article className="vk-card mb-4 overflow-hidden pb-3">
       {phoneReel ? (
         <div className="relative">
           <MediaCarousel media={post.media} onDoubleTap={() => like(true)} aspect="9/16" />
@@ -178,7 +178,7 @@ export function PostCard({ post: initial, onRemove }: { post: Post; onRemove: (i
         </>
       )}
 
-      <div className="px-3 md:px-0">
+      <div className="px-4">
         <div className={post.media.length > 1 ? "mt-1" : ""}>
           <ActionBar post={post} onLike={() => like()} onSave={save} onComment={open} />
         </div>
