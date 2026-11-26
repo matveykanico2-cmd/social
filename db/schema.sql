@@ -142,6 +142,14 @@ CREATE TABLE IF NOT EXISTS conversation_members (
 );
 CREATE INDEX IF NOT EXISTS conversation_members_user ON conversation_members(user_id);
 
+CREATE TABLE IF NOT EXISTS conversation_typing (
+  conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (conversation_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS conversation_typing_updated ON conversation_typing(conversation_id, updated_at);
+
 CREATE TABLE IF NOT EXISTS messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,

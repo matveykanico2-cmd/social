@@ -336,6 +336,7 @@ function Thread({ id }: { id: number }) {
   const [other, setOther] = useState<UserLite | null>(null);
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [text, setText] = useState("");
+  const [otherTyping, setOtherTyping] = useState(false);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const [otherLastReadId, setOtherLastReadId] = useState(0);
@@ -405,6 +406,8 @@ function Thread({ id }: { id: number }) {
         if (d.kind) setChatKind(d.kind);
         if (d.members?.length) setChatMemberCount(d.members.length);
         setOtherLastReadId(d.otherLastReadId);
+        const typing = await api<{ typing: boolean }>(`/api/conversations/${id}/typing`).catch(() => ({ typing: false }));
+        setOtherTyping(typing.typing);
         // Drop messages that were unsent; anything newer than the server's list was just sent and is kept.
         const present = new Set(d.ids);
         const newest = d.ids.length ? Math.max(...d.ids) : 0;
@@ -431,6 +434,16 @@ function Thread({ id }: { id: number }) {
       clearInterval(t);
     };
   }, [id, me.id, refreshUnread, retry]);
+
+  useEffect(() => {
+    if (!text.trim() || editing) {
+      void api(`/api/conversations/${id}/typing`, { method: "DELETE" }).catch(() => undefined);
+      return;
+    }
+    void api(`/api/conversations/${id}/typing`, { method: "POST" }).catch(() => undefined);
+    const timer = window.setTimeout(() => void api(`/api/conversations/${id}/typing`, { method: "DELETE" }).catch(() => undefined), 3500);
+    return () => window.clearTimeout(timer);
+  }, [id, text, editing]);
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "end" });
@@ -653,7 +666,7 @@ function Thread({ id }: { id: number }) {
               {chatTitle || other.name || other.username}
               {!chatTitle && other.verified && <Verified />}
             </div>
-            <div className="flex items-center gap-1 truncate text-xs text-muted">{chatKind === "group" ? `${chatMemberCount} members` : other.lastSeenAt ? `Last seen ${timeAgo(other.lastSeenAt, true)}` : "Offline"}{chatKind === "direct" && other.lastSeenAt && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-label="Recently active" />}</div>
+            <div className={`flex items-center gap-1 truncate text-xs ${otherTyping ? "text-link" : "text-muted"}`}>{otherTyping ? "Typing…" : chatKind === "group" ? `${chatMemberCount} members` : other.lastSeenAt ? `Last seen ${timeAgo(other.lastSeenAt, true)}` : "Offline"}{chatKind === "direct" && !otherTyping && other.lastSeenAt && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-label="Recently active" />}</div>
           </div>
         </Link>
         <div className="flex items-center gap-1">

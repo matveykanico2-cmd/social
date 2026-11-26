@@ -88,6 +88,7 @@ export function migrate(db) {
     CREATE INDEX IF NOT EXISTS users_seed ON users(is_seed) WHERE is_seed = 1;
     CREATE INDEX IF NOT EXISTS messages_seed ON messages(is_seed) WHERE is_seed = 1;
     CREATE INDEX IF NOT EXISTS chat_folder_items_user ON chat_folder_items(user_id, folder_id, conversation_id);
+    CREATE INDEX IF NOT EXISTS conversation_typing_updated ON conversation_typing(conversation_id, updated_at);
   `);
   ensureWelcomeMessages(db);
 }
