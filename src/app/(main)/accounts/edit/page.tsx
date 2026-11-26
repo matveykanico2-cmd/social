@@ -9,7 +9,7 @@ import { useApp } from "@/components/app-context";
 import { Avatar, OptionsMenu, PrimaryButton } from "@/components/ui";
 
 export default function EditProfilePage() {
-  const { me, setMe, toast } = useApp();
+  const { me, setMe, toast, language, setLanguage } = useApp();
   const router = useRouter();
   const [form, setForm] = useState({ name: me.name, lastName: me.lastName, username: me.username, website: me.website, bio: me.bio, email: me.email, phone: me.phone ?? "" });
   const [privacy, setPrivacy] = useState({ privateAccount: me.privateAccount, showActivity: me.showActivity, allowMessages: me.allowMessages });
@@ -154,6 +154,12 @@ export default function EditProfilePage() {
         {field("bio", "Bio", undefined, true)}
         {field("email", "Email", "Only you can see this.")}
         {field("phone", "Phone number", "Use the configured admin number to unlock the admin panel.")}
+        <section className="rounded-2xl border border-border p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div><h2 className="text-base font-bold">Interface language</h2><p className="mt-1 text-sm text-muted">Choose the language used in navigation and menus.</p></div>
+            <select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "ru")} className="rounded-lg bg-field px-3 py-2 text-sm outline-none"><option value="en">English</option><option value="ru">Русский</option></select>
+          </div>
+        </section>
         <section className="rounded-2xl border border-border p-4">
           <h2 className="mb-1 text-base font-bold">Privacy and messaging</h2>
           <p className="mb-4 text-sm text-muted">Control who can see your activity and contact you.</p>
