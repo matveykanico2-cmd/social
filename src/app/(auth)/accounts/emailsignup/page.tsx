@@ -12,6 +12,7 @@ export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const additional = searchParams.get("add") === "1";
+  const returnTo = searchParams.get("returnTo");
   const [form, setForm] = useState({ email: "", phone: "", password: "", name: "", lastName: "", username: "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,8 +41,8 @@ export default function SignupPage() {
   return (
     <div className="w-full max-w-[350px]">
       <div className="mb-2.5 border-separator px-10 pb-6 pt-10 sm:border">
-        <button type="button" onClick={() => router.push(additional ? "/accounts/edit" : "/accounts/login")} className="mb-4 flex items-center gap-2 text-sm font-semibold text-muted hover:text-fg">
-          <ArrowLeft size={18} /> Back
+        <button type="button" onClick={() => router.push(additional && returnTo?.startsWith("/") ? returnTo : additional ? "/" : "/accounts/login")} className="mb-4 flex items-center gap-2 text-sm font-semibold text-muted hover:text-fg">
+          <ArrowLeft size={18} /> {additional ? "Back to existing account" : "Back"}
         </button>
         <h1 className="mb-3 mt-2 text-center">
           <Logo className="text-[46px]" />

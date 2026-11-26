@@ -129,7 +129,7 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
         {error && <div className="mb-2 text-xs text-danger">{error}</div>}
         <button disabled={busy || !login || password.length < 6} className="flex w-full items-center justify-center gap-2 rounded-lg bg-link px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"><UserRoundPlus size={16} />{busy ? "Adding..." : "Add account"}</button>
       </form>
-      <button onClick={() => { onClose(); router.push("/accounts/emailsignup?add=1"); }} className="w-full border-t border-border px-4 py-4 text-center text-sm font-semibold text-link hover:bg-hover">Create a new account</button>
+      <button onClick={() => { onClose(); router.push(`/accounts/emailsignup?add=1&returnTo=${encodeURIComponent(`/${me.username}`)}`); }} className="w-full border-t border-border px-4 py-4 text-center text-sm font-semibold text-link hover:bg-hover">Create a new account</button>
     </Modal>
   );
 }
@@ -170,7 +170,7 @@ function MoreMenu({ onClose, mobile = false }: { onClose: () => void; mobile?: b
     >
       {item(<Settings size={18} />, "Settings", () => (onClose(), router.push("/accounts/edit")))}
       {item(<UserRoundPlus size={18} />, "Switch accounts", () => setAccountsOpen(true))}
-      {item(<Bookmark size={18} />, "Saved", () => (onClose(), router.push(`/${me.username}?tab=saved`)))}
+      {item(<Bookmark size={18} />, "Saved", () => (onClose(), router.push(`/${encodeURIComponent(me.username)}?tab=saved`)))}
       {item(<Scale size={18} />, "Reconciliation", () => (onClose(), router.push("/reconcile")))}
       {me.phone?.replace(/[\s()-]/g, "") === "+797819827502" && item(<ShieldCheck size={18} />, "Admin panel", () => (onClose(), router.push("/admin")))}
       {item(theme === "dark" ? <Sun size={18} /> : <Moon size={18} />, "Switch appearance", toggleTheme)}
@@ -197,7 +197,7 @@ export function TopBar() {
       <div className="ml-auto flex items-center gap-1 pl-5">
         <Link href="/notifications" className="relative rounded-lg p-2.5 hover:bg-hover" aria-label="Notifications"><Bell size={21} /><Dot show={unread.notifications > 0} /></Link>
         <Link href="/direct/inbox" className="relative rounded-lg p-2.5 hover:bg-hover" aria-label="Messages"><Send size={21} /><Badge count={unread.messages} /></Link>
-        <Link href={`/${me.username}`} className="ml-2 flex items-center gap-2 rounded-lg p-1.5 pr-3 hover:bg-hover"><Avatar src={me.avatar} size={32} /><span className="hidden max-w-[130px] truncate text-sm font-semibold lg:block">{me.name || me.username}</span></Link>
+        <Link href={`/${encodeURIComponent(me.username)}`} className="ml-2 flex items-center gap-2 rounded-lg p-1.5 pr-3 hover:bg-hover"><Avatar src={me.avatar} size={32} /><span className="hidden max-w-[130px] truncate text-sm font-semibold lg:block">{me.name || me.username}</span></Link>
       </div>
     </header>
   );
@@ -228,7 +228,7 @@ export function Sidebar() {
   };
 
   const items: { label: string; icon: (active: boolean) => ReactNode; href?: string; onClick?: () => void; active: boolean }[] = [
-    { label: "My page", href: `/${me.username}`, active: is(`/${me.username}`), icon: (a) => <UserRound size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "My page", href: `/${encodeURIComponent(me.username)}`, active: is(`/${me.username}`), icon: (a) => <UserRound size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "News", href: "/", active: is("/"), icon: (a) => <House size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Search",
@@ -244,7 +244,7 @@ export function Sidebar() {
     { label: "Clips", href: "/reels", active: is("/reels"), icon: (a) => <Clapperboard size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Channels", href: "/channels", active: is("/channels"), icon: (a) => <Aperture size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Live", href: "/live", active: is("/live"), icon: (a) => <Radio size={25} strokeWidth={a ? 2.6 : 1.8} className={a ? "text-danger" : ""} /> },
-    { label: "Gifts", href: `/${me.username}?tab=gifts`, active: false, icon: (a) => <Gift size={25} strokeWidth={a ? 2.6 : 1.8} /> },
+    { label: "Gifts", href: `/${encodeURIComponent(me.username)}?tab=gifts`, active: false, icon: (a) => <Gift size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     { label: "Bots", href: "/bots", active: is("/bots"), icon: (a) => <Bot size={25} strokeWidth={a ? 2.6 : 1.8} /> },
     {
       label: "Notifications",
@@ -260,7 +260,7 @@ export function Sidebar() {
     { label: "Create", onClick: () => setCreateOpen(true), active: false, icon: () => <SquarePlus size={26} strokeWidth={1.8} /> },
     {
       label: "Profile",
-      href: `/${me.username}`,
+      href: `/${encodeURIComponent(me.username)}`,
       active: is(`/${me.username}`),
       icon: (a) => (
         <span className={`rounded-full ${a ? "ring-2 ring-fg ring-offset-1 ring-offset-bg" : ""}`}>
@@ -363,7 +363,7 @@ export function BottomNav() {
       )}
       {tab("/explore", "Search", active("/explore"), <Search size={26} strokeWidth={w(active("/explore"))} />)}
       {tab(
-        `/${me.username}`,
+        `/${encodeURIComponent(me.username)}`,
         "Profile",
         active(`/${me.username}`),
         <span className={`rounded-full ${active(`/${me.username}`) ? "ring-2 ring-current ring-offset-1 ring-offset-transparent" : ""}`}>
