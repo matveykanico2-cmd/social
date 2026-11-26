@@ -42,6 +42,8 @@
 
 .chat-thread {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, var(--link) 8%), var(--bg) 38%);
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
 
 .chat-theme-midnight .chat-thread { background: radial-gradient(circle at top right, rgba(37, 99, 235, .25), transparent 42%), #0f172a; }

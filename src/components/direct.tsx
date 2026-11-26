@@ -708,7 +708,7 @@ function Thread({ id }: { id: number }) {
 
       {searchOpen && <div className="flex shrink-0 items-center gap-2 border-b border-separator bg-elevated px-4 py-2"><Search size={17} className="text-muted" /><input value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void searchChat()} placeholder="Search this chat" className="min-w-0 flex-1 bg-transparent outline-none" autoFocus /><button type="button" onClick={() => void searchChat()} className="text-sm font-semibold text-link">Search</button>{searchResults && <button type="button" onClick={() => { setSearch(""); setSearchResults(null); }} className="text-sm text-muted">Clear</button>}</div>}
 
-      <div className="chat-thread flex-1 overflow-y-auto px-3 py-5 md:px-8 md:py-6">
+      <div className="chat-thread flex-1 overflow-y-auto px-3 py-6 md:px-8 md:py-8">
         {searchResults && <div className="mb-4 rounded-xl border border-link/20 bg-link/5 px-3 py-2 text-sm text-muted">Found {searchResults.length} message{searchResults.length === 1 ? "" : "s"} for “{search}”.</div>}
         <div className="mb-8 flex flex-col items-center pt-4 text-center">
           <Avatar src={other.avatar} size={96} />
@@ -738,7 +738,7 @@ function Thread({ id }: { id: number }) {
                 </div>
               )}
               <div
-                className={`group mb-0.5 flex items-end gap-2 max-md:select-none ${mine ? "justify-end" : ""} ${lastOfGroup ? "mb-2" : ""}`}
+                className={`group mb-1.5 flex items-end gap-2 max-md:select-none ${mine ? "justify-end" : ""} ${lastOfGroup ? "mb-4" : ""}`}
                 {...(canInteract ? holdToOpenMenu(m.id) : {})}
               >
                 {!mine && <span className="w-7 shrink-0">{lastOfGroup && <Avatar src={other.avatar} size={28} />}</span>}
