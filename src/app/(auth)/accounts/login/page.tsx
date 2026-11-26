@@ -38,7 +38,7 @@ export default function LoginPage() {
         <form onSubmit={submit} className="flex flex-col gap-1.5">
           <AuthInput label="Phone number, username, or email" value={login} onChange={setLogin} autoComplete="username" />
           <AuthInput label="Password" type="password" value={password} onChange={setPassword} autoComplete="current-password" />
-          {needsTotp && <label className="mt-2 block text-sm"><span className="mb-1 block font-semibold">Authenticator code</span><input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={totpCode} onChange={(event) => setTotpCode(event.target.value.replace(/\\D/g, "").slice(0, 6))} placeholder="6-digit code" className="w-full rounded-lg border border-separator bg-transparent p-3" /></label>}
+          {needsTotp && <label className="mt-2 block text-sm"><span className="mb-1 block font-semibold">Authenticator code</span><input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={totpCode} onChange={(event) => setTotpCode(event.target.value.replace(/[^0-9]/g, "").slice(0, 6))} placeholder="6-digit code" className="w-full rounded-lg border border-separator bg-transparent p-3" /></label>}
           <button
             disabled={!login || password.length < 6 || busy || (needsTotp && totpCode.length !== 6)}
             className="mt-2.5 rounded-lg bg-link py-[7px] text-sm font-semibold text-white hover:bg-link-hover disabled:opacity-70"
