@@ -1,14 +1,11 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { api } from "@/lib/client";
 import type { Me, Post } from "@/lib/types";
 import { Toast } from "./ui";
 
 type PostListener = (post: Post | null) => void;
-const languageListeners = new Set<() => void>();
-const readLanguage = () => (typeof window !== "undefined" && window.localStorage.getItem("shalter:language") === "ru" ? "ru" : "en") as "en" | "ru";
-const subscribeLanguage = (listener: () => void) => { languageListeners.add(listener); return () => languageListeners.delete(listener); };
 
 type AppState = {
   me: Me;
@@ -44,12 +41,21 @@ export function AppProvider({ initialMe, children }: { initialMe: Me; children: 
   const [createOpen, setCreateOpen] = useState(false);
   const [modalPost, setModalPost] = useState<AppState["modalPost"]>(null);
   const [sharePost, setSharePost] = useState<Post | null>(null);
-  const language = useSyncExternalStore(subscribeLanguage, readLanguage, () => "en" as const);
+  const [language, setLanguageState] = useState<"en" | "ru">("ru");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("shalter:language");
+    document.documentElement.lang = saved === "en" ? "en" : "ru";
+    if (saved === "en" || saved === "ru") {
+      const timer = window.setTimeout(() => setLanguageState(saved), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
 
   const setLanguage = useCallback((next: "en" | "ru") => {
     window.localStorage.setItem("shalter:language", next);
     document.documentElement.lang = next;
-    languageListeners.forEach((listener) => listener());
+    setLanguageState(next);
   }, []);
 
   const refreshUnread = useCallback(() => {

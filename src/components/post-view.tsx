@@ -280,6 +280,7 @@ export function PostView({
             onClose?.();
           }}
           onUnfollow={() => setPost({ ...post, user: { ...post.user, isFollowing: false } })}
+          onChanged={setPost}
         />
       )}
       {showLikes && <UserListModal title="Likes" url={`/api/posts/${post.id}/likes`} onClose={() => setShowLikes(false)} />}

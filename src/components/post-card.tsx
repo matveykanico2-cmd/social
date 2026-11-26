@@ -36,12 +36,14 @@ export function PostMenu({
   onDeleted,
   onUnfollow,
   hideGoToPost,
+  onChanged,
 }: {
   post: Post;
   onClose: () => void;
   onDeleted: () => void;
   onUnfollow?: () => void;
   hideGoToPost?: boolean;
+  onChanged?: (post: Post) => void;
 }) {
   const { me, toast, openShare } = useApp();
   const router = useRouter();
@@ -79,6 +81,20 @@ export function PostMenu({
   }
 
   const options = [
+    ...(mine ? [{
+      label: "Edit post",
+      onClick: async () => {
+        const caption = window.prompt("Edit caption", post.caption);
+        if (caption === null) return;
+        const location = window.prompt("Edit location", post.location);
+        try {
+          const result = await api<{ post: Post }>(`/api/posts/${post.id}`, { method: "PATCH", body: { caption, location: location ?? post.location } });
+          onChanged?.(result.post);
+          toast("Post updated.");
+          onClose();
+        } catch (error) { toast((error as Error).message); }
+      },
+    }] : []),
     ...(mine ? [{ label: "Delete", danger: true, onClick: () => setConfirmDelete(true) }] : []),
     ...(!mine && post.user.isFollowing
       ? [
@@ -223,6 +239,7 @@ export function PostCard({ post: initial, onRemove }: { post: Post; onRemove: (i
           onClose={() => setMenu(false)}
           onDeleted={() => onRemove(post.id)}
           onUnfollow={() => setPost((p) => ({ ...p, user: { ...p.user, isFollowing: false } }))}
+          onChanged={setPost}
         />
       )}
       {showLikes && <UserListModal title="Likes" url={`/api/posts/${post.id}/likes`} onClose={() => setShowLikes(false)} />}
