@@ -14,7 +14,7 @@ function manage(id: number, userId: number) {
 export const GET = route(async (_req, { params }: { params: Promise<{ id: string }> }) => {
   const me = await requireUser();
   const id = intParam((await params).id);
-  const community = get<{ id: number; name: string; slug: string; description: string; birthday: string | null; owner_id: number; is_private: number }>("SELECT id, name, slug, description, birthday, owner_id, is_private FROM communities WHERE id = ?", id);
+  const community = get<{ id: number; name: string; slug: string; description: string; avatar: string | null; birthday: string | null; owner_id: number; is_private: number }>("SELECT id, name, slug, description, avatar, birthday, owner_id, is_private FROM communities WHERE id = ?", id);
   if (!community) throw new HttpError(404, "Community not found.");
   if (community.is_private && !get("SELECT 1 FROM community_members WHERE community_id = ? AND user_id = ?", id, me.id)) throw new HttpError(403, "This community is private.");
   const members = all<{ uid: number; username: string; name: string; avatar: string | null; verified: number; role: string; joined_at: number }>("SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified, cm.role, cm.joined_at FROM community_members cm JOIN users u ON u.id = cm.user_id WHERE cm.community_id = ? ORDER BY cm.role = 'owner' DESC, cm.role = 'admin' DESC, cm.joined_at", id);

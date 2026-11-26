@@ -18,7 +18,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 | bots | `src/app/api/bots/*`, `src/app/(main)/bots` | partial | Bot CRUD, avatars, commands and webhook work; full donor Bot API/Mini Apps remain. |
 | calls, realtime | `src/app/api/calls/*`, `src/app/api/conversations/*/calls`, `src/components/call-overlay.tsx` | partial | WebRTC audio/video signaling works; WebSocket, group calls, TURN and recovery remain. |
 | channels, chats, folders, messages | `src/app/api/conversations/*`, `src/app/api/channels`, `src/app/api/chat-folders`, `src/lib/server/dm.ts` | partial | DM/groups/channels, roles, folders, reactions, reply, pin, edit, delete, forward, media, voice, polls and themes work; typing/online/archive/invites remain. |
-| communities | `src/app/api/communities/*`, `src/app/(main)/communities` | partial | Communities, roles, birthday, privacy and posts work; donor discovery rules remain. |
+| communities | `src/app/api/communities/*`, `src/app/(main)/communities` | partial | Communities, avatars, roles, birthday, privacy and posts work; donor discovery rules remain. |
 | contacts, nearby | — | todo | Requires contact permission/geo privacy policy. |
 | downloads, export, share-target, short-links | `/api/share`, media routes | partial | Sharing and media serving work; donor download/export/share-target contracts remain. |
 | exchange, stars, premium, purchase | — | todo | Requires payment provider and accounting model; no fake payment implementation added. |

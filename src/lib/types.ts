@@ -133,6 +133,7 @@ export type Community = {
   name: string;
   slug: string;
   description: string;
+  avatar: string | null;
   birthday: string | null;
   ownerId: number;
   memberCount: number;
