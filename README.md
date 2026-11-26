@@ -18,6 +18,12 @@ Create a real account at `/accounts/emailsignup`, then connect additional accoun
 
 Email confirmation is disabled. Password recovery checks the account's email and phone number together, then allows a one-time password change for 30 minutes without sending a letter. Yandex SMTP is optional and is used only for the admin's manual test email; if enabled, copy `.env.example` to `.env.local`, fill in `YANDEX_EMAIL` and `YANDEX_APP_PASSWORD`, then restart the server. shalter uses `smtp.yandex.ru` over SSL on port `465`.
 
+### Authenticator-based two-factor login (TOTP)
+
+SHALTER supports optional RFC 6238 TOTP authentication. Set a persistent encryption key on the **server**, e.g. generate a random 32-byte key with `openssl rand -hex 32` and put the value in `SHALTER_TOTP_ENCRYPTION_KEY` in your private environment (never commit this key). Restart the application. In **Edit profile → Two-factor authentication**, enter your current password, add the displayed secret to an authenticator app, and confirm the six-digit code. After activation, the login page requires both password and authenticator code.
+
+The encrypted secret and the last accepted counter are stored in SQLite. Authenticator enrollment is unavailable when the environment key is absent. **Back up the key securely**: losing it makes existing TOTP-protected accounts unable to sign in until recovered administratively. A self-service backup/recovery-code flow is not yet implemented. The current implementation is a first TOTP security increment, not a completed authentication-security audit.
+
 ### Production launch
 
 ```bash
