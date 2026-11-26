@@ -145,6 +145,10 @@ function notificationText(n: Notification) {
       return `liked your comment: ${n.text}`;
     case "follow":
       return "started following you.";
+    case "friend_request":
+      return "sent you a friend request.";
+    case "friend_accept":
+      return "accepted your friend request.";
   }
 }
 

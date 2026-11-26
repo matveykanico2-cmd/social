@@ -104,6 +104,17 @@ CREATE TABLE IF NOT EXISTS reports (
 CREATE INDEX IF NOT EXISTS reports_status ON reports(status, created_at);
 CREATE INDEX IF NOT EXISTS follows_following ON follows(following_id);
 
+CREATE TABLE IF NOT EXISTS friend_requests (
+  requester_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  addressee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (requester_id, addressee_id),
+  CHECK (requester_id != addressee_id)
+);
+CREATE INDEX IF NOT EXISTS friend_requests_addressee ON friend_requests(addressee_id, status, updated_at);
+
 CREATE TABLE IF NOT EXISTS stories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

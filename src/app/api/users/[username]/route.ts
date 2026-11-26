@@ -25,6 +25,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     has_story: number;
     is_business: number;
     business_category: string;
+    friend_status: "none" | "outgoing" | "incoming" | "friends";
   }>(
     `SELECT u.id, u.username, u.name, u.last_name, u.avatar, u.cover, u.verified, u.bio, u.website, u.is_business, u.business_category,
        (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
@@ -32,8 +33,18 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
        u.imported_following_count + (SELECT COUNT(*) FROM follows WHERE follower_id = u.id) AS following_count,
        EXISTS (SELECT 1 FROM follows WHERE follower_id = ? AND following_id = u.id) AS is_following,
        EXISTS (SELECT 1 FROM follows WHERE follower_id = u.id AND following_id = ?) AS follows_you,
+       CASE
+         WHEN EXISTS (SELECT 1 FROM friend_requests fr WHERE fr.status = 'accepted' AND ((fr.requester_id = ? AND fr.addressee_id = u.id) OR (fr.requester_id = u.id AND fr.addressee_id = ?))) THEN 'friends'
+         WHEN EXISTS (SELECT 1 FROM friend_requests fr WHERE fr.status = 'pending' AND fr.requester_id = ? AND fr.addressee_id = u.id) THEN 'outgoing'
+         WHEN EXISTS (SELECT 1 FROM friend_requests fr WHERE fr.status = 'pending' AND fr.requester_id = u.id AND fr.addressee_id = ?) THEN 'incoming'
+         ELSE 'none'
+       END AS friend_status,
        EXISTS (SELECT 1 FROM stories WHERE user_id = u.id AND expires_at > ?) AS has_story
      FROM users u WHERE u.username = ?`,
+    me.id,
+    me.id,
+    me.id,
+    me.id,
     me.id,
     me.id,
     now(),
@@ -74,6 +85,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     isBusiness: !!r.is_business,
     businessCategory: r.business_category,
     mutuals: { users: mutualUsers, count: mutualCount },
+    friendStatus: r.friend_status,
   };
   return { profile };
 });

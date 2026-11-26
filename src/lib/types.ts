@@ -56,6 +56,7 @@ export type Profile = UserLite & {
   businessCategory: string;
   /** People you follow who follow this profile (first few) and how many there are in total. */
   mutuals: { users: UserLite[]; count: number };
+  friendStatus: "none" | "outgoing" | "incoming" | "friends";
 };
 
 export type FollowUser = UserLite & { isFollowing: boolean; isMe: boolean };
@@ -68,7 +69,7 @@ export type Highlight = { id: number; title: string; cover: Media };
 
 export type Notification = {
   id: number;
-  type: "like" | "comment" | "follow" | "comment_like";
+  type: "like" | "comment" | "follow" | "comment_like" | "friend_request" | "friend_accept";
   text: string;
   createdAt: number;
   read: boolean;

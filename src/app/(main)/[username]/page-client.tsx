@@ -14,6 +14,24 @@ import { Avatar, Modal, SecondaryButton, Spinner, Verified } from "@/components/
 
 type Tab = "posts" | "reels" | "saved";
 
+function FriendButton({ username, status, onChange }: { username: string; status: Profile["friendStatus"]; onChange: (status: Profile["friendStatus"]) => void }) {
+  const { toast } = useApp();
+  const [busy, setBusy] = useState(false);
+  const action = async (method: string, body?: object) => {
+    setBusy(true);
+    try {
+      const result = await api<{ status: Profile["friendStatus"] }>(`/api/users/${encodeURIComponent(username)}/friend`, { method, body });
+      onChange(result.status);
+    } catch (error) {
+      toast((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (status === "incoming") return <div className="flex gap-2"><SecondaryButton disabled={busy} onClick={() => void action("PATCH", { action: "accept" })}>Accept friend</SecondaryButton><SecondaryButton disabled={busy} onClick={() => void action("PATCH", { action: "reject" })}>Decline</SecondaryButton></div>;
+  return <SecondaryButton disabled={busy} onClick={() => void action(status === "none" ? "POST" : "DELETE")}>{status === "none" ? "Add friend" : status === "outgoing" ? "Request sent" : "Friends"}</SecondaryButton>;
+}
+
 function Stat({ n, label, onClick }: { n: number; label: string; onClick?: () => void }) {
   const inner = (
     <>
@@ -109,6 +127,8 @@ function ProfileContent() {
       profile: { ...p, isFollowing: following, followerCount: p.followerCount + (following ? 1 : -1) },
     });
 
+  const setFriendStatus = (friendStatus: Profile["friendStatus"]) => profileReq.setData({ profile: { ...p, friendStatus } });
+
   const message = async () => {
     try {
       const { id } = await api<{ id: number }>("/api/conversations", { body: { username: p.username } });
@@ -135,6 +155,7 @@ function ProfileContent() {
       <SecondaryButton onClick={message} className="max-md:flex-1">
         Message
       </SecondaryButton>
+      <FriendButton username={p.username} status={p.friendStatus} onChange={setFriendStatus} />
       <SecondaryButton aria-label="Suggested accounts" className="px-2" onClick={() => router.push("/explore/people")}>
         <UserPlus size={16} />
       </SecondaryButton>
