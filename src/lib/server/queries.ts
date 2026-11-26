@@ -4,7 +4,7 @@ import { all, get, run, now } from "./db";
 import type { Comment, FollowUser, Media, Post, UserLite } from "@/lib/types";
 import { sendPush } from "./push";
 
-type UserCols = { uid: number; username: string; name: string; avatar: string | null; verified: number };
+type UserCols = { uid: number; username: string; name: string; avatar: string | null; verified: number; last_seen_at?: number | null };
 
 export const userLite = (r: UserCols): UserLite => ({
   id: r.uid,
@@ -12,6 +12,7 @@ export const userLite = (r: UserCols): UserLite => ({
   name: r.name,
   avatar: r.avatar,
   verified: !!r.verified,
+  lastSeenAt: r.last_seen_at ?? null,
 });
 
 type PostRow = UserCols & {

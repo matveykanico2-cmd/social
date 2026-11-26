@@ -3,7 +3,7 @@ import { all, db, get, run, now, tx } from "./db";
 import { addWelcomeMessage } from "../../../db/welcome.mjs";
 import { HttpError } from "./http";
 import { firstMedia, userLite } from "./queries";
-import type { InvoiceCard, Message, MessageKind, UserLite } from "@/lib/types";
+import type { ChatMedia, InvoiceCard, Message, MessageKind, UserLite } from "@/lib/types";
 
 /** Returns the 1:1 conversation between two users, creating it if needed. */
 export function conversationBetween(a: number, b: number): number {
@@ -132,15 +132,15 @@ export function otherMember(conversationId: number, viewerId: number): UserLite 
     if (channel?.kind === "channel") run("INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, 'member')", conversationId, viewerId);
     else throw new HttpError(404, "Conversation not found.");
   }
-  const r = get<{ uid: number; username: string; name: string; avatar: string | null; verified: number }>(
-    `SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified FROM conversation_members cm
+  const r = get<{ uid: number; username: string; name: string; avatar: string | null; verified: number; last_seen_at: number | null }>(
+    `SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified, u.last_seen_at FROM conversation_members cm
      JOIN users u ON u.id = cm.user_id WHERE cm.conversation_id = ? AND cm.user_id != ?`,
     conversationId,
     viewerId,
   );
   if (!r) {
-    const channelOwner = get<{ uid: number; username: string; name: string; avatar: string | null; verified: number }>(
-      `SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified FROM conversations c JOIN users u ON u.id = c.owner_id WHERE c.id = ? AND c.kind = 'channel'`,
+    const channelOwner = get<{ uid: number; username: string; name: string; avatar: string | null; verified: number; last_seen_at: number | null }>(
+      `SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified, u.last_seen_at FROM conversations c JOIN users u ON u.id = c.owner_id WHERE c.id = ? AND c.kind = 'channel'`,
       conversationId,
     );
     if (channelOwner) return userLite(channelOwner);
@@ -184,7 +184,7 @@ export function forwardMessage(messageId: number, targetConversationId: number, 
   return sendMessage(targetConversationId, userId, `Forwarded: ${source.text}`);
 }
 
-export function sendMediaMessage(conversationId: number, senderId: number, media: { url: string; kind: "image" | "video" }) {
+export function sendMediaMessage(conversationId: number, senderId: number, media: ChatMedia) {
   const t = now();
   const { id } = run(
     "INSERT INTO messages (conversation_id, sender_id, kind, text, media_url, media_kind, created_at) VALUES (?, ?, 'media', '', ?, ?, ?)",
@@ -390,7 +390,7 @@ export function loadMessages(conversationId: number, afterId = 0, viewerId: numb
     voice_seconds: number | null;
     voice_url: string | null;
     media_url: string | null;
-    media_kind: "image" | "video" | null;
+    media_kind: "image" | "video" | "circle" | null;
     call_type: "audio" | "video" | null;
     call_status: "outgoing" | "missed" | "ended" | null;
     gift_id: number | null;

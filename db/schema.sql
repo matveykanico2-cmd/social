@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   website TEXT NOT NULL DEFAULT '',
   avatar TEXT,
   cover TEXT,
+  last_seen_at INTEGER,
   verified INTEGER NOT NULL DEFAULT 0,
   private_account INTEGER NOT NULL DEFAULT 0,
   show_activity INTEGER NOT NULL DEFAULT 1,

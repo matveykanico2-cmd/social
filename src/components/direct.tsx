@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BarChart3, ChevronDown, ChevronLeft, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
+import { BarChart3, ChevronDown, ChevronLeft, CirclePlay, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
 import { api, timeAgo, useApi, useIsPhone } from "@/lib/client";
 import type { Conversation, FollowUser, Message, Post, UserLite } from "@/lib/types";
 import { CallOverlay, type CallSignal } from "./call-overlay";
@@ -257,6 +257,7 @@ function SharedPostBubble({ post, mine }: { post: NonNullable<Message["post"]>; 
 }
 
 function MediaBubble({ media, mine }: { media: NonNullable<Message["media"]>; mine: boolean }) {
+  if (media.kind === "circle") return <div className={`overflow-hidden rounded-full border-4 ${mine ? "border-link" : "border-border"}`}><video src={media.url} controls playsInline className="aspect-square h-[220px] w-[220px] object-cover" /></div>;
   return (
     <div className={`max-w-[75%] overflow-hidden rounded-2xl ${mine ? "bg-bubble-mine" : "bg-bubble-them"}`}>
       {media.kind === "video" ? (
@@ -345,6 +346,7 @@ function Thread({ id }: { id: number }) {
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editing, setEditing] = useState<Message | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const circleInput = useRef<HTMLInputElement>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const voiceChunks = useRef<Blob[]>([]);
   const voiceStarted = useRef(0);
@@ -558,9 +560,10 @@ function Thread({ id }: { id: number }) {
     }
   };
 
-  const sendMedia = async (file: File) => {
+  const sendMedia = async (file: File, circle = false) => {
     const form = new FormData();
     form.set("file", file);
+    if (circle) form.set("circle", "1");
     try {
       const { message } = await api<{ message: Message }>(`/api/conversations/${id}/media`, { body: form });
       if (message) {
@@ -650,7 +653,7 @@ function Thread({ id }: { id: number }) {
               {chatTitle || other.name || other.username}
               {!chatTitle && other.verified && <Verified />}
             </div>
-            <div className="truncate text-xs text-muted">{chatKind === "group" ? `${chatMemberCount} members` : other.username}</div>
+            <div className="flex items-center gap-1 truncate text-xs text-muted">{chatKind === "group" ? `${chatMemberCount} members` : other.lastSeenAt ? `Last seen ${timeAgo(other.lastSeenAt, true)}` : "Offline"}{chatKind === "direct" && other.lastSeenAt && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-label="Recently active" />}</div>
           </div>
         </Link>
         <div className="flex items-center gap-1">
@@ -870,6 +873,10 @@ function Thread({ id }: { id: number }) {
             />
             <button type="button" onClick={() => fileInput.current?.click()} aria-label="Attach photo or video" title="Attach photo or video">
               <Paperclip size={23} />
+            </button>
+            <input ref={circleInput} type="file" accept="video/*" capture="user" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void sendMedia(file, true); }} />
+            <button type="button" onClick={() => circleInput.current?.click()} aria-label="Record video circle" title="Record video circle">
+              <CirclePlay size={23} />
             </button>
             <button type="button" onClick={() => { setStickerOpen((open) => !open); setGiftOpen(false); setEmojiOpen(false); }} aria-label="Choose a sticker" title="Choose a sticker">
               <Sticker size={24} />

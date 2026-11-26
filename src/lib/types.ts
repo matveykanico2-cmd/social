@@ -6,11 +6,13 @@ export type UserLite = {
   name: string;
   avatar: string | null;
   verified: boolean;
+  lastSeenAt?: number | null;
 };
 
 export type Me = UserLite & { email: string; phone?: string | null; lastName: string; bio: string; website: string; cover: string | null; privateAccount: boolean; showActivity: boolean; allowMessages: boolean };
 
 export type Media = { url: string; kind: "image" | "video" };
+export type ChatMedia = { url: string; kind: "image" | "video" | "circle" };
 
 export type Post = {
   id: number;
@@ -106,7 +108,7 @@ export type Message = {
   /** Length of a voice note (placeholder only, no audio). */
   voiceSeconds: number | null;
   voiceUrl: string | null;
-  media: Media | null;
+  media: ChatMedia | null;
   call: { type: "audio" | "video"; status: "outgoing" | "missed" | "ended" } | null;
   gift: { id: number | null; name: string; emoji: string; price: number } | null;
   poll: { question: string; options: { text: string; votes: number; voted: boolean }[]; totalVotes: number } | null;

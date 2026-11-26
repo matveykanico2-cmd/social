@@ -21,6 +21,7 @@ export const GET = route(async () => {
     name: string;
     avatar: string | null;
     verified: number;
+    last_seen_at: number | null;
     m_id: number | null;
     m_text: string | null;
     m_sender: number | null;
@@ -30,7 +31,7 @@ export const GET = route(async () => {
     `SELECT c.id, c.updated_at, me.last_read_id,
        c.kind, c.title, c.theme,
        (SELECT COUNT(*) FROM conversation_members all_members WHERE all_members.conversation_id = c.id) AS member_count,
-       u.id AS uid, u.username, u.name, u.avatar, u.verified,
+       u.id AS uid, u.username, u.name, u.avatar, u.verified, u.last_seen_at,
        m.id AS m_id, m.text AS m_text, m.sender_id AS m_sender, m.kind AS m_kind, m.created_at AS m_at
      FROM conversation_members me
      JOIN conversations c ON c.id = me.conversation_id

@@ -19,6 +19,7 @@ export type UserRow = {
   website: string;
   avatar: string | null;
   cover: string | null;
+  last_seen_at: number | null;
   verified: number;
   private_account: number;
   show_activity: number;
@@ -94,7 +95,7 @@ export async function connectedAccounts() {
   if (!tokens.length) return [];
   const marks = tokens.map(() => "?").join(",");
   return all<UserRow>(
-    `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
+    `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token IN (${marks})`,
     ...tokens,
   );
@@ -103,13 +104,13 @@ export async function connectedAccounts() {
 export async function currentUser(): Promise<UserRow | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return (
-    get<UserRow>(
-      `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
+  const user = get<UserRow>(
+      `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
        FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?`,
       token,
-    ) ?? null
-  );
+    ) ?? null;
+  if (user) run("UPDATE users SET last_seen_at = ? WHERE id = ?", now(), user.id);
+  return user;
 }
 
 export async function requireUser(): Promise<UserRow> {
