@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Trash2, UserCheck, Users, Image as ImageIcon, MessageCircle, Clapperboard, Mail, Radio, MessagesSquare, Globe2, Flag } from "lucide-react";
+import { ShieldCheck, Trash2, UserCheck, Users, Image as ImageIcon, MessageCircle, Clapperboard, Mail, Radio, MessagesSquare, Globe2, Flag, Search, Activity } from "lucide-react";
 import { useState } from "react";
 import { api, useApi } from "@/lib/client";
 import { PrimaryButton, Verified } from "@/components/ui";
@@ -20,6 +20,8 @@ export default function AdminPage() {
   const server = useApi<ServerStatus>("/api/admin/server");
   const [email, setEmail] = useState("");
   const [mailStatus, setMailStatus] = useState<string | null>(null);
+  const [userQuery, setUserQuery] = useState("");
+  const [reportFilter, setReportFilter] = useState<"all" | "open" | "resolved" | "rejected">("all");
 
   const removeUser = async (id: number, username: string) => {
     if (!window.confirm(`Delete @${username} and all of their content?`)) return;
@@ -58,6 +60,8 @@ export default function AdminPage() {
     [Radio, "Live now", data.stats.live],
     [Flag, "Open reports", data.stats.reports],
   ] as const;
+  const filteredUsers = data.users.filter((user) => `${user.username} ${user.name} ${user.phone ?? ""}`.toLowerCase().includes(userQuery.trim().toLowerCase()));
+  const filteredReports = data.reports.filter((report) => reportFilter === "all" || report.status === reportFilter);
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-8">
@@ -65,14 +69,18 @@ export default function AdminPage() {
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-link text-white"><ShieldCheck size={24} /></span>
         <div><h1 className="text-2xl font-bold">Admin panel</h1><p className="text-muted">Manage users, content and activity</p></div>
       </div>
-      <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <nav className="vk-card mb-5 flex gap-1 overflow-x-auto p-1" aria-label="Admin sections">
+        {[['overview', 'Overview'], ['users', 'Users'], ['moderation', 'Moderation'], ['system', 'System']].map(([id, label]) => <a key={id} href={`#admin-${id}`} className="shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-muted hover:bg-hover hover:text-fg">{label}</a>)}
+      </nav>
+      <div id="admin-overview" className="mb-8 grid scroll-mt-20 grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map(([Icon, label, value]) => <div key={label} className="vk-card p-4"><Icon size={20} className="text-muted" /><div className="mt-3 text-2xl font-bold">{value}</div><div className="text-sm text-muted">{label}</div></div>)}
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="vk-card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="font-semibold">Users</h2><UserCheck size={18} className="text-muted" /></div>
+        <section id="admin-users" className="vk-card scroll-mt-20 overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold">Users <UserCheck size={18} className="text-muted" /></h2><label className="flex min-w-[190px] flex-1 items-center gap-2 rounded-lg bg-field px-3 py-2 text-muted sm:max-w-[260px]"><Search size={16} /><input value={userQuery} onChange={(event) => setUserQuery(event.target.value)} placeholder="Find user" className="min-w-0 flex-1 bg-transparent text-sm text-fg outline-none" /></label></div>
           <div className="divide-y divide-border">
-            {data.users.map((user) => <div key={user.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-1 truncate font-semibold">@{user.username} {user.verified ? <Verified size={14} /> : null}</div><div className="truncate text-xs text-muted">{user.name || "No name"} · {date(user.created_at)}</div></div>{user.phone && <span className="hidden text-xs text-muted sm:block">{user.phone}</span>}<button onClick={() => void toggleVerified(user)} aria-label={user.verified ? `Remove verification from ${user.username}` : `Verify ${user.username}`} title={user.verified ? "Remove verification" : "Verify account"} className={`rounded-lg px-2 py-1 text-xs font-semibold ${user.verified ? "bg-link/10 text-link" : "bg-field text-muted hover:text-fg"}`}>{user.verified ? "Verified" : "Verify"}</button><button onClick={() => void removeUser(user.id, user.username)} aria-label={`Delete ${user.username}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
+            {filteredUsers.map((user) => <div key={user.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-1 truncate font-semibold">@{user.username} {user.verified ? <Verified size={14} /> : null}</div><div className="truncate text-xs text-muted">{user.name || "No name"} · {date(user.created_at)}</div></div>{user.phone && <span className="hidden text-xs text-muted sm:block">{user.phone}</span>}<button type="button" onClick={() => void toggleVerified(user)} aria-label={user.verified ? `Remove verification from ${user.username}` : `Verify ${user.username}`} title={user.verified ? "Remove verification" : "Verify account"} className={`rounded-lg px-2 py-1 text-xs font-semibold ${user.verified ? "bg-link/10 text-link" : "bg-field text-muted hover:text-fg"}`}>{user.verified ? "Verified" : "Verify"}</button><button type="button" onClick={() => void removeUser(user.id, user.username)} aria-label={`Delete ${user.username}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
+            {!filteredUsers.length && <p className="px-4 py-8 text-center text-sm text-muted">No users match this search.</p>}
           </div>
         </section>
         <section className="vk-card overflow-hidden">
@@ -83,15 +91,15 @@ export default function AdminPage() {
         </section>
       </div>
       <div className="mt-6"><PrimaryButton type="button" onClick={reload}>Refresh</PrimaryButton></div>
-      <section className="vk-card mt-6 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold"><Flag size={18} />Moderation reports</h2><span className="text-xs text-muted">{data.stats.reports} open</span></div>
+      <section id="admin-moderation" className="vk-card mt-6 scroll-mt-20 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold"><Flag size={18} />Moderation reports</h2><div className="flex items-center gap-2"><select value={reportFilter} onChange={(event) => setReportFilter(event.target.value as typeof reportFilter)} className="rounded-lg bg-field px-2 py-1 text-xs outline-none"><option value="all">All</option><option value="open">Open</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option></select><span className="text-xs text-muted">{data.stats.reports} open</span></div></div>
         <div className="divide-y divide-border">
-          {data.reports.map((report) => <div key={report.id} className="flex flex-wrap items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="font-semibold">{report.target_type} #{report.target_id} <span className="font-normal text-muted">by @{report.reporter}</span></div><div className="truncate text-sm text-muted">{report.reason}</div></div><span className="rounded-full bg-field px-2 py-1 text-xs text-muted">{report.status}</span>{report.status === "open" && <div className="flex gap-2"><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "resolved" } }).then(reload)} className="rounded-lg bg-link px-3 py-1.5 text-xs font-semibold text-white">Resolve</button><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "rejected" } }).then(reload)} className="rounded-lg bg-field px-3 py-1.5 text-xs font-semibold">Reject</button></div>}</div>)}
-          {!data.reports.length && <p className="px-4 py-8 text-center text-sm text-muted">No reports yet.</p>}
+          {filteredReports.map((report) => <div key={report.id} className="flex flex-wrap items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="font-semibold">{report.target_type} #{report.target_id} <span className="font-normal text-muted">by @{report.reporter}</span></div><div className="truncate text-sm text-muted">{report.reason}</div></div><span className="rounded-full bg-field px-2 py-1 text-xs text-muted">{report.status}</span>{report.status === "open" && <div className="flex gap-2"><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "resolved" } }).then(reload)} className="rounded-lg bg-link px-3 py-1.5 text-xs font-semibold text-white">Resolve</button><button type="button" onClick={() => void api(`/api/admin/reports/${report.id}`, { method: "PATCH", body: { status: "rejected" } }).then(reload)} className="rounded-lg bg-field px-3 py-1.5 text-xs font-semibold">Reject</button></div>}</div>)}
+          {!filteredReports.length && <p className="px-4 py-8 text-center text-sm text-muted">No reports in this filter.</p>}
         </div>
       </section>
       <section className="mt-6 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center gap-2 font-semibold"><Mail size={18} />Email delivery</div><p className="mb-3 text-sm text-muted">Send a test through the configured Yandex SMTP mailbox.</p><div className="flex flex-col gap-2 sm:flex-row"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Recipient (empty = your account email)" className="min-w-0 flex-1 rounded-lg bg-field px-3 py-2 outline-none" /><PrimaryButton type="button" onClick={() => void testMail()}>Send test</PrimaryButton></div>{mailStatus && <p className="mt-3 text-sm text-muted">{mailStatus}</p>}</section>
-      {server.data && <section className="mt-6 rounded-xl border border-border bg-elevated p-4"><div className="mb-3 flex items-center justify-between"><div className="flex items-center gap-2 font-semibold"><ShieldCheck size={18} />Server status</div><span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">{server.data.status.toUpperCase()}</span></div><div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4"><div><div className="text-muted">Environment</div><div className="font-semibold">{server.data.environment}</div></div><div><div className="text-muted">Node</div><div className="font-semibold">{server.data.node}</div></div><div><div className="text-muted">Uptime</div><div className="font-semibold">{Math.floor(server.data.uptimeSeconds / 60)} min</div></div><div><div className="text-muted">Database</div><div className="font-semibold">{server.data.database.users} users · {server.data.database.conversations} chats</div></div></div><div className="mt-4 flex flex-wrap gap-2 text-xs"><span className={`rounded-full px-2 py-1 ${server.data.integrations.smtp ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>SMTP {server.data.integrations.smtp ? "ready" : "off"}</span><span className={`rounded-full px-2 py-1 ${server.data.integrations.push ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>Push {server.data.integrations.push ? "ready" : "off"}</span></div></section>}
+      {server.data && <section id="admin-system" className="vk-card mt-6 scroll-mt-20 p-4"><div className="mb-3 flex items-center justify-between"><div className="flex items-center gap-2 font-semibold"><Activity size={18} />Server status</div><span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600">{server.data.status.toUpperCase()}</span></div><div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4"><div><div className="text-muted">Environment</div><div className="font-semibold">{server.data.environment}</div></div><div><div className="text-muted">Node</div><div className="font-semibold">{server.data.node}</div></div><div><div className="text-muted">Uptime</div><div className="font-semibold">{Math.floor(server.data.uptimeSeconds / 60)} min</div></div><div><div className="text-muted">Database</div><div className="font-semibold">{server.data.database.users} users · {server.data.database.conversations} chats</div></div></div><div className="mt-4 flex flex-wrap gap-2 text-xs"><span className={`rounded-full px-2 py-1 ${server.data.integrations.smtp ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>SMTP {server.data.integrations.smtp ? "ready" : "off"}</span><span className={`rounded-full px-2 py-1 ${server.data.integrations.push ? "bg-emerald-500/10 text-emerald-600" : "bg-secondary text-muted"}`}>Push {server.data.integrations.push ? "ready" : "off"}</span></div></section>}
     </div>
   );
 }
