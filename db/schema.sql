@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS comments (
   post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
+  parent_id INTEGER REFERENCES comments(id) ON DELETE SET NULL,
   attachment_url TEXT,
   attachment_kind TEXT,
   created_at INTEGER NOT NULL

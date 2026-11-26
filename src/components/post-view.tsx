@@ -17,11 +17,13 @@ function CommentRow({
   canDelete,
   onReply,
   onDelete,
+  depth = 0,
 }: {
   comment: Comment;
   canDelete: boolean;
   onReply: () => void;
   onDelete: () => void;
+  depth?: number;
 }) {
   const [c, setC] = useState(comment);
   const [menu, setMenu] = useState(false);
@@ -35,7 +37,7 @@ function CommentRow({
     }
   };
   return (
-    <div className="group flex gap-3.5 py-2">
+    <div className={`group flex gap-3.5 py-2 ${depth ? "ml-8 border-l-2 border-separator pl-3" : ""}`}>
       <Link href={`/${c.user.username}`}>
         <Avatar src={c.user.avatar} size={32} />
       </Link>
@@ -105,6 +107,7 @@ export function PostView({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [attachment, setAttachment] = useState<File | null>(null);
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
   const [menu, setMenu] = useState(false);
   const [showLikes, setShowLikes] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -133,12 +136,14 @@ export function PostView({
     try {
       const body = new FormData();
       body.set("text", t);
+      if (replyTo) body.set("parentId", String(replyTo.id));
       if (attachment) body.set("file", attachment);
       const { comment } = await api<{ comment: Comment }>(`/api/posts/${post.id}/comments`, { body });
       setComments((c) => [...(c ?? []), comment]);
       setPost({ ...post, commentCount: post.commentCount + 1 });
       setText("");
       setAttachment(null);
+      setReplyTo(null);
       requestAnimationFrame(() => list.current?.scrollTo({ top: list.current.scrollHeight, behavior: "smooth" }));
     } catch (e) {
       toast((e as Error).message);
@@ -216,6 +221,7 @@ export function PostView({
                 comment={c}
                 canDelete={c.user.id === me.id || post.user.id === me.id}
                 onReply={() => {
+                  setReplyTo(c);
                   setText(`@${c.user.username} `);
                   input.current?.focus();
                 }}
@@ -223,6 +229,7 @@ export function PostView({
                   setComments((cs) => cs!.filter((x) => x.id !== c.id));
                   setPost({ ...post, commentCount: post.commentCount - 1 });
                 }}
+                depth={c.parentId ? 1 : 0}
               />
             ))
           )}
@@ -241,6 +248,7 @@ export function PostView({
             submit();
           }}
         >
+          {replyTo && <div className="absolute bottom-[52px] left-0 right-0 rounded-xl border border-border bg-elevated px-3 py-2 text-xs shadow-lg"><span className="font-semibold">Replying to @{replyTo.user.username}</span><button type="button" className="float-right text-link" onClick={() => { setReplyTo(null); setText(""); }}>Cancel</button></div>}
           <Avatar src={me.avatar} size={32} className="md:hidden" />
           <input ref={attachmentInput} type="file" accept="image/*,video/*,.gif" className="hidden" onChange={(e) => { setAttachment(e.target.files?.[0] ?? null); e.target.value = ""; }} />
           <button type="button" onClick={() => attachmentInput.current?.click()} className="shrink-0 text-muted hover:text-link" aria-label="Attach photo or video" title="Attach photo or video"><Paperclip size={19} /></button>

@@ -17,22 +17,31 @@ export const POST = route(async (req, { params }: Ctx) => {
   const post = get<{ user_id: number }>("SELECT user_id FROM posts WHERE id = ?", id);
   if (!post) throw new HttpError(404, "Post not found.");
   let text = "";
+  let parentId: number | null = null;
   let attachment: { url: string; kind: "image" | "video" } | null = null;
   if (req.headers.get("content-type")?.includes("multipart/form-data")) {
     const form = await req.formData();
     text = String(form.get("text") ?? "").trim().slice(0, 2200);
+    parentId = Number(form.get("parentId")) || null;
     const file = form.get("file");
     if (file instanceof File && file.size > 0) attachment = await saveUpload(file);
   } else {
-    text = String((await jsonBody<{ text: string }>(req)).text ?? "").trim().slice(0, 2200);
+    const payload = await jsonBody<{ text: string; parentId?: number }>(req);
+    text = String(payload.text ?? "").trim().slice(0, 2200);
+    parentId = Number(payload.parentId) || null;
   }
   if (!text && !attachment) throw new HttpError(400, "Write a comment or attach a file first.");
+  if (parentId) {
+    const parent = get<{ post_id: number }>("SELECT post_id FROM comments WHERE id = ?", parentId);
+    if (!parent || parent.post_id !== id) throw new HttpError(400, "Reply target not found.");
+  }
 
   const { id: commentId } = run(
-    "INSERT INTO comments (post_id, user_id, text, attachment_url, attachment_kind, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO comments (post_id, user_id, text, parent_id, attachment_url, attachment_kind, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
     id,
     me.id,
     text,
+    parentId,
     attachment?.url ?? null,
     attachment?.kind ?? null,
     now(),

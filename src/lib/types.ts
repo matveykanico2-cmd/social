@@ -33,6 +33,7 @@ export type Post = {
 export type Comment = {
   id: number;
   text: string;
+  parentId: number | null;
   createdAt: number;
   user: UserLite;
   likeCount: number;

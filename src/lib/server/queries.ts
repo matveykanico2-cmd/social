@@ -81,8 +81,8 @@ export function queryPosts(viewerId: number, where: string, params: SQLInputValu
 }
 
 export function queryComments(viewerId: number, postId: number): Comment[] {
-  return all<UserCols & { id: number; text: string; attachment_url: string | null; attachment_kind: Media["kind"] | null; created_at: number; like_count: number; liked: number }>(
-    `SELECT c.id, c.text, c.attachment_url, c.attachment_kind, c.created_at, u.id AS uid, u.username, u.name, u.avatar, u.verified,
+  return all<UserCols & { id: number; text: string; parent_id: number | null; attachment_url: string | null; attachment_kind: Media["kind"] | null; created_at: number; like_count: number; liked: number }>(
+    `SELECT c.id, c.text, c.parent_id, c.attachment_url, c.attachment_kind, c.created_at, u.id AS uid, u.username, u.name, u.avatar, u.verified,
        (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) AS like_count,
        EXISTS (SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = ?) AS liked
      FROM comments c JOIN users u ON u.id = c.user_id
@@ -92,6 +92,7 @@ export function queryComments(viewerId: number, postId: number): Comment[] {
   ).map((r) => ({
     id: r.id,
     text: r.text,
+    parentId: r.parent_id,
     createdAt: r.created_at,
     user: userLite(r),
     likeCount: r.like_count,

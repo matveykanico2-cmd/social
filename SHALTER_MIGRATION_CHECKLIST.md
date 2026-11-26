@@ -25,7 +25,7 @@ Status meanings: **done** = implemented in the unified Social runtime; **partial
 | games | — | todo | Donor games and leaderboards require sandboxed asset/API integration. |
 | gifts, stickers | Gifts: `src/app/api/gifts`, `src/app/api/conversations/*/gifts`; stickers: UI emoji fallback | partial | Gifts work; donor sticker catalog/assets remain. |
 | live | `src/app/api/live/*`, `src/app/(main)/live` | partial | Live rooms and viewer records work; RTMP ingest/transcoding remains. |
-| posts, stories, topics, search | `src/app/api/posts/*`, `stories/*`, `/api/search`, `/api/explore` | partial | Social feed, Stories, Reels, comments and search work; donor topic/search ranking remains. |
+| posts, stories, topics, search | `src/app/api/posts/*`, `stories/*`, `/api/search`, `/api/explore` | partial | Social feed, Stories, Reels, comments with attachments/nested replies and search work; donor topic/search ranking remains. |
 | mini-apps, oauth | — | todo | Requires signed app manifest and token scopes. |
 | push | `src/lib/server/push.ts`, `/api/push/*`, `public/sw.js` | partial | Web Push subscription works when VAPID is configured; native push remains. |
 | reports | `/api/reports`, `/api/admin/reports/[id]` | done | User reports and admin resolution verified through build and route smoke tests. |
