@@ -126,6 +126,7 @@ export type Conversation = {
   avatar?: string | null;
   memberCount: number;
   theme?: string;
+  archived?: boolean;
   other: UserLite;
   lastMessage: { text: string; senderId: number; createdAt: number; kind: MessageKind } | null;
   unread: boolean;

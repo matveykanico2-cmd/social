@@ -6,7 +6,7 @@ import { userIdByUsername } from "@/lib/server/users";
 import { conversationBetween, conversationGroup } from "@/lib/server/dm";
 import type { Conversation, MessageKind } from "@/lib/types";
 
-export const GET = route(async () => {
+export const GET = route(async (req) => {
   const me = await requireUser();
   const rows = all<{
     id: number;
@@ -27,19 +27,23 @@ export const GET = route(async () => {
     m_sender: number | null;
     m_kind: MessageKind;
     m_at: number | null;
+    archived: number;
   }>(
     `SELECT c.id, c.updated_at, me.last_read_id,
        c.kind, c.title, c.theme,
        (SELECT COUNT(*) FROM conversation_members all_members WHERE all_members.conversation_id = c.id) AS member_count,
        u.id AS uid, u.username, u.name, u.avatar, u.verified, u.last_seen_at,
+       COALESCE(cs.archived, 0) AS archived,
        m.id AS m_id, m.text AS m_text, m.sender_id AS m_sender, m.kind AS m_kind, m.created_at AS m_at
      FROM conversation_members me
      JOIN conversations c ON c.id = me.conversation_id
      JOIN users u ON u.id = CASE WHEN c.kind = 'channel' THEN c.owner_id ELSE (SELECT other.user_id FROM conversation_members other WHERE other.conversation_id = c.id AND other.user_id != me.user_id ORDER BY other.user_id LIMIT 1) END
+     LEFT JOIN chat_settings cs ON cs.conversation_id = c.id AND cs.user_id = me.user_id
      LEFT JOIN messages m ON m.id = (SELECT id FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC, id DESC LIMIT 1)
-     WHERE me.user_id = ?
+     WHERE me.user_id = ? AND COALESCE(cs.archived, 0) = ?
      ORDER BY c.updated_at DESC`,
     me.id,
+    new URL(req.url).searchParams.get("archived") === "1" ? 1 : 0,
   );
   const conversations: Conversation[] = rows
     // Hide empty threads you opened but never wrote in.
@@ -52,6 +56,7 @@ export const GET = route(async () => {
       memberCount: r.member_count,
       other: userLite(r),
       updatedAt: r.updated_at,
+      archived: !!r.archived,
       lastMessage: {
         text: r.m_text ?? "",
         senderId: r.m_sender!,

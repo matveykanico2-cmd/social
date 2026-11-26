@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BarChart3, ChevronDown, ChevronLeft, CirclePlay, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
+import { Archive, ArchiveRestore, BarChart3, ChevronDown, ChevronLeft, CirclePlay, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
 import { api, timeAgo, useApi, useIsPhone } from "@/lib/client";
 import type { Conversation, FollowUser, Message, Post, UserLite } from "@/lib/types";
 import { CallOverlay, type CallSignal } from "./call-overlay";
@@ -109,7 +109,8 @@ function NewMessageModal({ onClose }: { onClose: () => void }) {
 
 function ConversationList({ selectedId }: { selectedId: number | null }) {
   const { me } = useApp();
-  const { data, reload, error } = useApi<{ conversations: Conversation[] }>("/api/conversations");
+  const [showArchived, setShowArchived] = useState(false);
+  const { data, reload, error } = useApi<{ conversations: Conversation[] }>(`/api/conversations${showArchived ? "?archived=1" : ""}`);
   const foldersApi = useApi<{ folders: { id: number; name: string; conversationIds: number[] }[] }>("/api/chat-folders");
   const [composing, setComposing] = useState(false);
   const [q, setQ] = useState("");
@@ -188,7 +189,7 @@ function ConversationList({ selectedId }: { selectedId: number | null }) {
           <button type="button" onClick={() => setFilter("all")} className={`text-base max-md:text-[17px] ${filter === "all" ? "font-bold" : "text-muted"}`}>Messages</button>
           <button type="button" onClick={() => setFilter("unread")} className={`text-base max-md:text-[17px] ${filter === "unread" ? "font-bold" : "text-muted"}`}>Unread</button>
         </div>
-        <button type="button" className="flex items-center gap-1 text-sm font-semibold text-link" onClick={() => void createFolder()}><FolderPlus size={16} />Folder</button>
+        <div className="flex items-center gap-3"><button type="button" className="flex items-center gap-1 text-sm font-semibold text-muted" onClick={() => setShowArchived((value) => !value)}>{showArchived ? <ArchiveRestore size={16} /> : <Archive size={16} />}{showArchived ? "Messages" : "Archived"}</button><button type="button" className="flex items-center gap-1 text-sm font-semibold text-link" onClick={() => void createFolder()}><FolderPlus size={16} />Folder</button></div>
       </div>
       <div className="no-scrollbar flex gap-2 overflow-x-auto px-6 pb-3 max-md:px-4">
         <button type="button" onClick={() => setFolderId(null)} className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${folderId === null ? "bg-fg text-bg" : "bg-field text-muted"}`}>All chats</button>
@@ -209,6 +210,7 @@ function ConversationList({ selectedId }: { selectedId: number | null }) {
             const preview = last
               ? `${last.senderId === me.id ? "You: " : ""}${previewText(last)}`
               : "";
+            const archive = async () => { await api(`/api/conversations/${c.id}`, { method: "PATCH", body: { archived: !showArchived } }); reload(); };
             return <div key={c.id} className={`relative flex items-center gap-1 border-b border-separator hover:bg-hover ${selectedId === c.id ? "bg-link/10" : ""}`}>
               <Link href={`/direct/t/${c.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-6 py-2 max-md:px-4 max-md:py-2.5">
                 <Avatar src={c.other.avatar} size={56} />
@@ -218,7 +220,7 @@ function ConversationList({ selectedId }: { selectedId: number | null }) {
                 </div>
                 {c.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-[#5865f2] max-md:h-2.5 max-md:w-2.5" />}
               </Link>
-              {foldersApi.data?.folders.length ? <div className="relative mr-3"><button type="button" onClick={() => setAssigning(assigning === c.id ? null : c.id)} className="rounded-full p-2 text-muted hover:bg-field hover:text-fg" aria-label="Add chat to folder" title="Add to folder"><FolderPlus size={16} /></button>{assigning === c.id && <div className="absolute right-0 top-10 z-20 min-w-36 rounded-xl border border-border bg-elevated p-1 shadow-lg">{foldersApi.data.folders.map((folder) => <button type="button" key={folder.id} onClick={() => void assign(c.id, folder.id)} className="block w-full rounded-lg px-3 py-2 text-left text-xs hover:bg-hover">{folder.name}</button>)}</div>}</div> : null}
+              <div className="relative mr-3 flex"><button type="button" onClick={() => void archive()} className="rounded-full p-2 text-muted hover:bg-field hover:text-fg" aria-label={showArchived ? "Restore chat" : "Archive chat"} title={showArchived ? "Restore chat" : "Archive chat"}>{showArchived ? <ArchiveRestore size={16} /> : <Archive size={16} />}</button>{foldersApi.data?.folders.length ? <><button type="button" onClick={() => setAssigning(assigning === c.id ? null : c.id)} className="rounded-full p-2 text-muted hover:bg-field hover:text-fg" aria-label="Add chat to folder" title="Add to folder"><FolderPlus size={16} /></button>{assigning === c.id && <div className="absolute right-0 top-10 z-20 min-w-36 rounded-xl border border-border bg-elevated p-1 shadow-lg">{foldersApi.data.folders.map((folder) => <button type="button" key={folder.id} onClick={() => void assign(c.id, folder.id)} className="block w-full rounded-lg px-3 py-2 text-left text-xs hover:bg-hover">{folder.name}</button>)}</div>}</> : null}</div>
             </div>;
           })
         )}

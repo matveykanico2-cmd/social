@@ -62,8 +62,8 @@ export function conversationDetails(conversationId: number, viewerId: number) {
     `SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified, cm.role
      FROM conversation_members cm JOIN users u ON u.id = cm.user_id WHERE cm.conversation_id = ? ORDER BY cm.role = 'owner' DESC, cm.user_id`, conversationId,
   ).map((member) => ({ ...userLite(member), role: member.role }));
-  const settings = get<{ wallpaper: string; muted_until: number | null }>("SELECT wallpaper, muted_until FROM chat_settings WHERE user_id = ? AND conversation_id = ?", viewerId, conversationId);
-  return { kind: chat.kind, title: chat.title, theme: chat.theme, wallpaper: settings?.wallpaper ?? "default", mutedUntil: settings?.muted_until ?? null, linkedDiscussionId: chat.linked_conversation_id, members };
+  const settings = get<{ wallpaper: string; muted_until: number | null; archived: number }>("SELECT wallpaper, muted_until, archived FROM chat_settings WHERE user_id = ? AND conversation_id = ?", viewerId, conversationId);
+  return { kind: chat.kind, title: chat.title, theme: chat.theme, wallpaper: settings?.wallpaper ?? "default", mutedUntil: settings?.muted_until ?? null, archived: !!settings?.archived, linkedDiscussionId: chat.linked_conversation_id, members };
 }
 
 export function updateConversationTheme(conversationId: number, viewerId: number, theme: string) {
@@ -71,13 +71,14 @@ export function updateConversationTheme(conversationId: number, viewerId: number
   run("UPDATE conversations SET theme = ? WHERE id = ?", theme, conversationId);
 }
 
-export function updateChatSettings(conversationId: number, viewerId: number, patch: { wallpaper?: string; mutedUntil?: number | null }) {
+export function updateChatSettings(conversationId: number, viewerId: number, patch: { wallpaper?: string; mutedUntil?: number | null; archived?: boolean }) {
   if (!get("SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?", conversationId, viewerId)) throw new HttpError(404, "Conversation not found.");
-  const current = get<{ wallpaper: string; muted_until: number | null }>("SELECT wallpaper, muted_until FROM chat_settings WHERE user_id = ? AND conversation_id = ?", viewerId, conversationId);
+  const current = get<{ wallpaper: string; muted_until: number | null; archived: number }>("SELECT wallpaper, muted_until, archived FROM chat_settings WHERE user_id = ? AND conversation_id = ?", viewerId, conversationId);
   const wallpaper = patch.wallpaper ?? current?.wallpaper ?? "default";
   const mutedUntil = patch.mutedUntil === undefined ? current?.muted_until ?? null : patch.mutedUntil;
-  run("INSERT INTO chat_settings (user_id, conversation_id, wallpaper, muted_until, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id, conversation_id) DO UPDATE SET wallpaper = excluded.wallpaper, muted_until = excluded.muted_until", viewerId, conversationId, wallpaper, mutedUntil, now());
-  return { wallpaper, mutedUntil };
+  const archived = patch.archived === undefined ? !!current?.archived : patch.archived;
+  run("INSERT INTO chat_settings (user_id, conversation_id, wallpaper, muted_until, archived, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(user_id, conversation_id) DO UPDATE SET wallpaper = excluded.wallpaper, muted_until = excluded.muted_until, archived = excluded.archived", viewerId, conversationId, wallpaper, mutedUntil, archived ? 1 : 0, now());
+  return { wallpaper, mutedUntil, archived };
 }
 
 export function createCall(conversationId: number, initiatorId: number, kind: "audio" | "video") {

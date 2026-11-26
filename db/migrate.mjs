@@ -68,6 +68,7 @@ const ADDED_COLUMNS = [
   ["messages", "edited_at", "INTEGER"],
   ["messages", "pinned_at", "INTEGER"],
   ["messages", "pinned_by", "INTEGER REFERENCES users(id) ON DELETE SET NULL"],
+  ["chat_settings", "archived", "INTEGER NOT NULL DEFAULT 0"],
   ["messages", "is_seed", "INTEGER NOT NULL DEFAULT 0"],
   // Custom highlight cover; NULL means use the first story.
   ["highlights", "cover_url", "TEXT"],

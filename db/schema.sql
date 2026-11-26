@@ -486,6 +486,7 @@ CREATE TABLE IF NOT EXISTS chat_settings (
   conversation_id INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   wallpaper TEXT NOT NULL DEFAULT 'default',
   muted_until INTEGER,
+  archived INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, conversation_id)
 );
