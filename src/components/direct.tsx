@@ -325,6 +325,7 @@ function ForwardModal({ message, onClose, onDone }: { message: Message; onClose:
 }
 
 const QUICK_EMOJI = ["😂", "😍", "🥰", "😊", "😅", "😎", "🤔", "😢", "👍", "👌", "🙏", "👏", "💪", "🔥", "✨", "🎉", "❤️", "💕", "🤍", "✅", "📦", "👕", "☕", "🛍️"];
+const QUICK_STICKERS = ["🦊", "🐼", "🐸", "🐱", "🐶", "🦄", "👻", "🤖", "👑", "💫", "🌈", "🍕", "🚀", "🎈", "💌", "🎁"];
 
 /** Messages are shown in time order; ids break ties. */
 const byTime = (a: Message, b: Message) => a.createdAt - b.createdAt || a.id - b.id;
@@ -340,6 +341,7 @@ function Thread({ id }: { id: number }) {
   const [menuFor, setMenuFor] = useState<number | null>(null);
   const [forwardFor, setForwardFor] = useState<Message | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [stickerOpen, setStickerOpen] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editing, setEditing] = useState<Message | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -830,6 +832,11 @@ function Thread({ id }: { id: number }) {
             ))}
           </div>
         )}
+        {stickerOpen && (
+          <div className="absolute bottom-[52px] right-0 grid grid-cols-4 gap-1 rounded-2xl border border-border bg-elevated p-3 shadow-xl">
+            {QUICK_STICKERS.map((sticker) => <button type="button" key={sticker} onClick={() => { void send(sticker); setStickerOpen(false); }} className="rounded-xl p-2 text-3xl hover:bg-hover" aria-label={`Send sticker ${sticker}`}>{sticker}</button>)}
+          </div>
+        )}
         {giftOpen && <div className="absolute bottom-[52px] right-0 grid grid-cols-3 gap-2 rounded-2xl border border-border bg-elevated p-3 shadow-xl">{gifts.loading ? <Spinner size={22} /> : gifts.data?.gifts.map((gift) => <button type="button" key={gift.id} onClick={() => void sendGiftMessage(gift)} className="flex w-20 flex-col items-center rounded-xl p-2 hover:bg-hover"><span className="text-3xl">{gift.emoji}</span><span className="mt-1 truncate text-xs font-semibold">{gift.name}</span><span className="text-[10px] text-muted">{gift.price} stars</span></button>)}</div>}
         <button type="button" onClick={() => setEmojiOpen((o) => !o)} aria-label="Choose an emoji">
           <Smile size={24} />
@@ -864,7 +871,7 @@ function Thread({ id }: { id: number }) {
             <button type="button" onClick={() => fileInput.current?.click()} aria-label="Add photo or video">
               <ImageIcon size={24} />
             </button>
-            <button type="button" onClick={() => send("❤️")} aria-label="Send a heart">
+            <button type="button" onClick={() => { setStickerOpen((open) => !open); setGiftOpen(false); setEmojiOpen(false); }} aria-label="Choose a sticker" title="Choose a sticker">
               <Sticker size={24} />
             </button>
             <button type="button" onClick={() => setPollOpen(true)} aria-label="Create poll" title="Create poll">
