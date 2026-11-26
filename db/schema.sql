@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   avatar TEXT,
   owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   linked_conversation_id INTEGER REFERENCES conversations(id) ON DELETE SET NULL,
+  invite_token TEXT UNIQUE,
   theme TEXT NOT NULL DEFAULT 'default',
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL

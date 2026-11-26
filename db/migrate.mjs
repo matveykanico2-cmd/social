@@ -48,6 +48,7 @@ const ADDED_COLUMNS = [
   ["conversations", "avatar", "TEXT"],
   ["conversations", "owner_id", "INTEGER REFERENCES users(id) ON DELETE SET NULL"],
   ["conversations", "linked_conversation_id", "INTEGER REFERENCES conversations(id) ON DELETE SET NULL"],
+  ["conversations", "invite_token", "TEXT"],
   ["conversations", "theme", "TEXT NOT NULL DEFAULT 'default'"],
   ["conversation_members", "role", "TEXT NOT NULL DEFAULT 'member'"],
   ["messages", "kind", "TEXT NOT NULL DEFAULT 'text'"], // text | post | voice | invoice | receipt | welcome

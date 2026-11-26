@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Archive, ArchiveRestore, BarChart3, ChevronDown, ChevronLeft, CirclePlay, FolderPlus, Forward, Gift, Info, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
+import { Archive, ArchiveRestore, BarChart3, ChevronDown, ChevronLeft, CirclePlay, FolderPlus, Forward, Gift, Info, Link2, Mic, MoreHorizontal, Palette, Paperclip, Phone, Pin, Search, Smile, Square, SquarePen, Send, Sticker, Video, X } from "lucide-react";
 import { api, timeAgo, useApi, useIsPhone } from "@/lib/client";
 import type { Conversation, FollowUser, Message, Post, UserLite } from "@/lib/types";
 import { CallOverlay, type CallSignal } from "./call-overlay";
@@ -516,6 +516,14 @@ function Thread({ id }: { id: number }) {
     catch (e) { toast((e as Error).message); }
   };
 
+  const shareInvite = async () => {
+    try {
+      const { url } = await api<{ url: string }>(`/api/conversations/${id}/invite`, { method: "POST" });
+      await navigator.clipboard.writeText(`${location.origin}${url}`);
+      toast("Invite link copied");
+    } catch (e) { toast((e as Error).message); }
+  };
+
   const toggleMute = async () => {
     const muted = !(mutedUntil && mutedUntil > Date.now());
     setMutedUntil(muted ? Date.now() + 8 * 60 * 60 * 1000 : null);
@@ -688,6 +696,7 @@ function Thread({ id }: { id: number }) {
           <button className="rounded-full p-2 hover:bg-hover" onClick={() => void cycleWallpaper()} aria-label="Change chat wallpaper" title="Change chat wallpaper">
             <Sticker size={21} />
           </button>
+          {chatKind !== "direct" && <button className="rounded-full p-2 hover:bg-hover" onClick={() => void shareInvite()} aria-label="Copy invite link" title="Copy invite link"><Link2 size={22} /></button>}
           <button className={`rounded-full p-2 hover:bg-hover ${isMuted ? "text-link" : ""}`} onClick={() => void toggleMute()} aria-label={isMuted ? "Unmute chat" : "Mute chat"} title={isMuted ? "Unmute chat" : "Mute chat"}>
             <MoreHorizontal size={22} />
           </button>
