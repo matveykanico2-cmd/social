@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   kind TEXT NOT NULL DEFAULT 'direct',
   title TEXT,
+  avatar TEXT,
   owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   linked_conversation_id INTEGER REFERENCES conversations(id) ON DELETE SET NULL,
   theme TEXT NOT NULL DEFAULT 'default',

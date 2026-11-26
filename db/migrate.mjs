@@ -41,6 +41,7 @@ const ADDED_COLUMNS = [
   ["conversations", "is_seed", "INTEGER NOT NULL DEFAULT 0"],
   ["conversations", "kind", "TEXT NOT NULL DEFAULT 'direct'"],
   ["conversations", "title", "TEXT"],
+  ["conversations", "avatar", "TEXT"],
   ["conversations", "owner_id", "INTEGER REFERENCES users(id) ON DELETE SET NULL"],
   ["conversations", "linked_conversation_id", "INTEGER REFERENCES conversations(id) ON DELETE SET NULL"],
   ["conversations", "theme", "TEXT NOT NULL DEFAULT 'default'"],

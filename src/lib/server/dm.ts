@@ -40,14 +40,14 @@ export function conversationGroup(ownerId: number, memberIds: number[], title: s
 }
 
 /** Creates a broadcast channel. The owner is the only member who may publish for now. */
-export function conversationChannel(ownerId: number, title: string): number {
+export function conversationChannel(ownerId: number, title: string, avatar: string | null = null): number {
   const clean = title.trim().slice(0, 80);
   if (!clean) throw new HttpError(400, "Channel name is required.");
   return tx(() => {
     const t = now();
-    const { id } = run("INSERT INTO conversations (kind, title, owner_id, created_at, updated_at) VALUES ('channel', ?, ?, ?, ?)", clean, ownerId, t, t);
+    const { id } = run("INSERT INTO conversations (kind, title, avatar, owner_id, created_at, updated_at) VALUES ('channel', ?, ?, ?, ?, ?)", clean, avatar, ownerId, t, t);
     run("INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, 'owner')", id, ownerId);
-    const discussion = run("INSERT INTO conversations (kind, title, owner_id, created_at, updated_at) VALUES ('group', ?, ?, ?, ?)", `${clean} · Discussion`, ownerId, t, t);
+    const discussion = run("INSERT INTO conversations (kind, title, avatar, owner_id, created_at, updated_at) VALUES ('group', ?, ?, ?, ?, ?)", `${clean} · Discussion`, avatar, ownerId, t, t);
     run("INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, 'owner')", discussion.id, ownerId);
     run("UPDATE conversations SET linked_conversation_id = ? WHERE id = ?", discussion.id, id);
     return id;

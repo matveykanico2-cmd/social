@@ -120,6 +120,7 @@ export type Conversation = {
   id: number;
   kind: "direct" | "group" | "channel";
   title: string | null;
+  avatar?: string | null;
   memberCount: number;
   theme?: string;
   other: UserLite;
