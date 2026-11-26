@@ -37,6 +37,7 @@ export type Comment = {
   user: UserLite;
   likeCount: number;
   liked: boolean;
+  attachment: Media | null;
 };
 
 export type Profile = UserLite & {

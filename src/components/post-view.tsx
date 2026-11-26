@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { MoreHorizontal, X } from "lucide-react";
+import { MoreHorizontal, Paperclip, X } from "lucide-react";
 import { api, compact, timeAgo } from "@/lib/client";
 import type { Comment, Post } from "@/lib/types";
 import { useApp } from "./app-context";
@@ -43,6 +43,7 @@ function CommentRow({
         <div className="break-words">
           <UserName user={c.user} className="mr-1" />
           <RichText text={c.text} />
+          {c.attachment && (c.attachment.kind === "video" ? <video src={c.attachment.url} controls playsInline className="mt-2 max-h-64 max-w-full rounded-xl" /> : <CommentImage src={c.attachment.url} />)}
         </div>
         <div className="mt-1.5 flex items-center gap-3 text-xs text-muted">
           <span title={new Date(c.createdAt).toLocaleString()}>{timeAgo(c.createdAt)}</span>
@@ -80,6 +81,11 @@ function CommentRow({
   );
 }
 
+function CommentImage({ src }: { src: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt="Comment attachment" className="mt-2 max-h-64 max-w-full rounded-xl object-cover" />;
+}
+
 /**
  * Full post with comments. layout="split" puts media left / comments right (desktop modal + post page);
  * it collapses to a stacked layout on small screens.
@@ -98,9 +104,11 @@ export function PostView({
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [menu, setMenu] = useState(false);
   const [showLikes, setShowLikes] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const attachmentInput = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLDivElement>(null);
 
   const setPost = (p: Post) => {
@@ -120,13 +128,17 @@ export function PostView({
 
   const submit = async () => {
     const t = text.trim();
-    if (!t || sending) return;
+    if ((!t && !attachment) || sending) return;
     setSending(true);
     try {
-      const { comment } = await api<{ comment: Comment }>(`/api/posts/${post.id}/comments`, { body: { text: t } });
+      const body = new FormData();
+      body.set("text", t);
+      if (attachment) body.set("file", attachment);
+      const { comment } = await api<{ comment: Comment }>(`/api/posts/${post.id}/comments`, { body });
       setComments((c) => [...(c ?? []), comment]);
       setPost({ ...post, commentCount: post.commentCount + 1 });
       setText("");
+      setAttachment(null);
       requestAnimationFrame(() => list.current?.scrollTo({ top: list.current.scrollHeight, behavior: "smooth" }));
     } catch (e) {
       toast((e as Error).message);
@@ -230,6 +242,8 @@ export function PostView({
           }}
         >
           <Avatar src={me.avatar} size={32} className="md:hidden" />
+          <input ref={attachmentInput} type="file" accept="image/*,video/*,.gif" className="hidden" onChange={(e) => { setAttachment(e.target.files?.[0] ?? null); e.target.value = ""; }} />
+          <button type="button" onClick={() => attachmentInput.current?.click()} className="shrink-0 text-muted hover:text-link" aria-label="Attach photo or video" title="Attach photo or video"><Paperclip size={19} /></button>
           <input
             ref={input}
             value={text}
@@ -239,12 +253,13 @@ export function PostView({
             maxLength={2200}
           />
           <button
-            disabled={!text.trim() || sending}
+            disabled={(!text.trim() && !attachment) || sending}
             className="font-semibold text-link hover:text-link-text disabled:opacity-30"
           >
             Post
           </button>
         </form>
+        {attachment && <div className="border-t border-separator px-4 py-2 text-xs text-muted">Attached: {attachment.name} <button type="button" className="ml-2 font-semibold text-link" onClick={() => setAttachment(null)}>Remove</button></div>}
       </div>
 
       {menu && (

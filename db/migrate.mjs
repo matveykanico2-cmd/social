@@ -38,6 +38,8 @@ const ADDED_COLUMNS = [
   ["users", "allow_messages", "INTEGER NOT NULL DEFAULT 1"],
   ["users", "cover", "TEXT"],
   ["users", "last_seen_at", "INTEGER"],
+  ["comments", "attachment_url", "TEXT"],
+  ["comments", "attachment_kind", "TEXT"],
   ["communities", "avatar", "TEXT"],
   ["conversations", "is_seed", "INTEGER NOT NULL DEFAULT 0"],
   ["conversations", "kind", "TEXT NOT NULL DEFAULT 'direct'"],

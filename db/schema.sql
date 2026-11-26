@@ -64,6 +64,8 @@ CREATE TABLE IF NOT EXISTS comments (
   post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
+  attachment_url TEXT,
+  attachment_kind TEXT,
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS comments_post ON comments(post_id, id);
