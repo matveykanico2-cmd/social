@@ -145,19 +145,20 @@ function ConversationList({ selectedId }: { selectedId: number | null }) {
   }, [selectedId, reload]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-6 pb-3 pt-9 max-md:px-4 max-md:pt-3">
-        {/* Phones: big centered username, like the Instagram app. */}
-        <span className="flex items-center gap-1 text-xl font-bold max-md:flex-1 max-md:justify-center max-md:pl-7 max-md:text-[22px]">
-          {me.username}
-          {me.verified && <Verified size={14} />}
-          <ChevronDown size={18} />
-        </span>
-        <button onClick={() => setComposing(true)} aria-label="New message">
-          <SquarePen size={26} />
+    <div className="flex h-full flex-col bg-bg">
+      <div className="flex items-center justify-between border-b border-separator px-6 pb-3 pt-6 max-md:px-4 max-md:pt-3">
+        <div className="min-w-0">
+          <span className="flex items-center gap-1 text-xl font-bold max-md:text-[22px]">
+            Messenger
+            <ChevronDown size={18} className="text-muted" />
+          </span>
+          <span className="text-xs text-muted max-md:hidden">Your conversations and communities</span>
+        </div>
+        <button type="button" onClick={() => setComposing(true)} aria-label="New message" className="rounded-lg p-2 hover:bg-hover">
+          <SquarePen size={24} />
         </button>
       </div>
-      <label className="mx-4 mb-2 flex h-11 items-center gap-3 rounded-full bg-field px-4 text-muted max-md:mx-3 max-md:h-12">
+      <label className="mx-5 mb-2 mt-3 flex h-11 items-center gap-3 rounded-lg bg-field px-4 text-muted max-md:mx-3 max-md:h-12">
         <Search size={20} />
         <input
           value={q}
@@ -208,7 +209,7 @@ function ConversationList({ selectedId }: { selectedId: number | null }) {
             const preview = last
               ? `${last.senderId === me.id ? "You: " : ""}${previewText(last)}`
               : "";
-            return <div key={c.id} className={`relative flex items-center gap-1 hover:bg-hover ${selectedId === c.id ? "bg-hover" : ""}`}>
+            return <div key={c.id} className={`relative flex items-center gap-1 border-b border-separator hover:bg-hover ${selectedId === c.id ? "bg-link/10" : ""}`}>
               <Link href={`/direct/t/${c.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-6 py-2 max-md:px-4 max-md:py-2.5">
                 <Avatar src={c.other.avatar} size={56} />
                 <div className="min-w-0 flex-1 max-md:leading-[22px]">
