@@ -28,7 +28,7 @@ function storeRecent(users: FollowUser[]) {
 /** User search with "Recent" history, used in the desktop side panel and the mobile Explore page. */
 export function SearchBox({ onNavigate, compactInput = false }: { onNavigate?: () => void; compactInput?: boolean }) {
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<FollowUser[] | null>(null);
+  const [results, setResults] = useState<{ users: FollowUser[]; posts: Post[]; hashtags: { tag: string; count: number }[]; locations: string[]; trends: { tag: string; count: number }[] } | null>(null);
   const [loading, setLoading] = useState(false);
   const [recent, setRecent] = useState<FollowUser[]>(loadRecent);
 
@@ -36,8 +36,8 @@ export function SearchBox({ onNavigate, compactInput = false }: { onNavigate?: (
     if (!q.trim()) return;
     const t = setTimeout(() => {
       setLoading(true);
-      api<{ users: FollowUser[] }>(`/api/search?q=${encodeURIComponent(q)}`)
-        .then((d) => setResults(d.users))
+      api<{ users: FollowUser[]; posts: Post[]; hashtags: { tag: string; count: number }[]; locations: string[]; trends: { tag: string; count: number }[] }>(`/api/search?q=${encodeURIComponent(q)}`)
+        .then(setResults)
         .finally(() => setLoading(false));
     }, 200);
     return () => clearTimeout(t);
@@ -101,8 +101,13 @@ export function SearchBox({ onNavigate, compactInput = false }: { onNavigate?: (
       </div>
       <div className="flex-1 overflow-y-auto pt-3">
         {q.trim() && results ? (
-          results.length ? (
-            results.map((u) => row(u, false))
+          results.users.length || results.posts.length || results.hashtags.length || results.locations.length ? (
+            <>
+              {results.users.map((u) => row(u, false))}
+              {results.hashtags.length > 0 && <div className="border-t border-separator px-6 py-3"><div className="mb-2 text-xs font-bold uppercase text-muted">Hashtags</div>{results.hashtags.map((item) => <Link key={item.tag} href={`/explore?search=${encodeURIComponent(item.tag)}`} onClick={onNavigate} className="block py-1 font-semibold text-link">{item.tag} <span className="text-xs font-normal text-muted">{item.count}</span></Link>)}</div>}
+              {results.locations.length > 0 && <div className="border-t border-separator px-6 py-3"><div className="mb-2 text-xs font-bold uppercase text-muted">Places</div>{results.locations.map((place) => <Link key={place} href={`/explore?location=${encodeURIComponent(place)}`} onClick={onNavigate} className="block py-1 font-semibold">{place}</Link>)}</div>}
+              {results.posts.length > 0 && <div className="border-t border-separator px-6 py-3"><div className="mb-2 text-xs font-bold uppercase text-muted">Posts</div>{results.posts.slice(0, 8).map((post) => <Link key={post.id} href={`/p/${post.id}`} onClick={onNavigate} className="flex items-center gap-2 py-2"><Avatar src={post.user.avatar} size={34} /><span className="min-w-0 flex-1 truncate"><b>@{post.user.username}</b> · {post.caption || post.location || "Post"}</span></Link>)}</div>}
+            </>
           ) : (
             <p className="px-6 py-4 text-center text-muted">No results found.</p>
           )

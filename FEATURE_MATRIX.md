@@ -12,7 +12,7 @@
 | Stories | upload, expiry, fullscreen viewer, progress, viewers, reply to Direct, delete, archive/highlights | polls, questions, mentions, close friends, music, effects | `/api/stories`, `story-viewer.tsx`; build |
 | Reels | vertical route, upload, autoplay UI, likes, comments, saves, sharing | transcoding, clip editor, remix/audio/subtitles | `/reels`, `/api/reels`; build |
 | Direct / Messenger | groups, channels, folders, archive, invite links, text, media, docs, audio, voice, circles, stickers, polls, reactions, reply, edit/delete, forward, read/last-seen, typing, themes, calls, SSE realtime, reconnect and recovery sync | native WebSocket transport, group WebRTC/TURN, disappearing media, E2E | `src/components/direct.tsx`, `/api/conversations/*`; build + 70 tests |
-| Search | user/post basic search, recent searches | full hashtags, places, trends and ranking | `/api/search`, panels; build |
+| Search | users, posts, recent searches, hashtags, places, 30-day trends and ranking | full semantic ranking and recommendations | `/api/search`, panels; build + 78 tests |
 | Notifications | likes, comments, follows, friend requests, push foundation, read state | category preferences, event deduplication, full email categories | `/api/notifications`, panels; build |
 | Live | rooms, viewers, route/UI | RTMP, recording, guests, realtime moderation | `/api/live`; build |
 | Professional tools | business flag/category, admin panel, server stats | creator analytics dashboard, scheduler, ads cabinet | admin/settings; build |
