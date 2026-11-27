@@ -21,6 +21,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     follower_count: number;
     following_count: number;
     is_following: number;
+    is_muted: number;
     follows_you: number;
     has_story: number;
     is_business: number;
@@ -32,6 +33,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
        u.imported_follower_count + (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS follower_count,
        u.imported_following_count + (SELECT COUNT(*) FROM follows WHERE follower_id = u.id) AS following_count,
        EXISTS (SELECT 1 FROM follows WHERE follower_id = ? AND following_id = u.id) AS is_following,
+       EXISTS (SELECT 1 FROM user_mutes WHERE muter_id = ? AND muted_id = u.id) AS is_muted,
        EXISTS (SELECT 1 FROM follows WHERE follower_id = u.id AND following_id = ?) AS follows_you,
        CASE
          WHEN EXISTS (SELECT 1 FROM friend_requests fr WHERE fr.status = 'accepted' AND ((fr.requester_id = ? AND fr.addressee_id = u.id) OR (fr.requester_id = u.id AND fr.addressee_id = ?))) THEN 'friends'
@@ -41,6 +43,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
        END AS friend_status,
        EXISTS (SELECT 1 FROM stories WHERE user_id = u.id AND expires_at > ?) AS has_story
      FROM users u WHERE u.username = ?`,
+    me.id,
     me.id,
     me.id,
     me.id,
@@ -79,6 +82,7 @@ export const GET = route(async (_req, { params }: { params: Promise<{ username: 
     followerCount: r.follower_count,
     followingCount: r.following_count,
     isFollowing: !!r.is_following,
+    isMuted: !!r.is_muted,
     followsYou: !!r.follows_you,
     isMe: r.id === me.id,
     hasStory: !!r.has_story,

@@ -32,6 +32,7 @@ Social остаётся единым приложением и единой ба
 | Push notifications | settings | `/api/push/*`, subscriptions | settings action | build | Перенесено с конфигурацией |
 | TOTP / 2FA | settings/login | `/api/auth/totp`, encrypted secret | setup/challenge UI | unit/API contract | Перенесено |
 | Personal data export | settings | `/api/me/export`, user-owned queries | download JSON action | build | Перенесено |
+| User mute | profile/feed | `/api/users/[username]/mute`, `user_mutes` | profile context menu | build | Перенесено |
 
 ## Что нельзя считать полностью перенесённым без инфраструктуры
 

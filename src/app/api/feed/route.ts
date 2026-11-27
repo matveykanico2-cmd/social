@@ -22,7 +22,10 @@ export const GET = route(async (req) => {
 
   // shortcut: shuffles every post id in memory; fine for thousands of posts, move to a stored random key beyond that.
   const order = all<{ id: number; video: number }>(
-    `SELECT p.id, EXISTS (SELECT 1 FROM post_media WHERE post_id = p.id AND kind = 'video') AS video FROM posts p WHERE p.archived_at IS NULL`,
+    `SELECT p.id, EXISTS (SELECT 1 FROM post_media WHERE post_id = p.id AND kind = 'video') AS video
+       FROM posts p WHERE p.archived_at IS NULL
+       AND NOT EXISTS (SELECT 1 FROM user_mutes WHERE muter_id = ? AND muted_id = p.user_id)`,
+    me.id,
   )
     .sort((a, b) => b.video - a.video || rank(a.id, seed) - rank(b.id, seed))
     .map((r) => r.id);

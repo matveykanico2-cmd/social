@@ -98,6 +98,15 @@ CREATE TABLE IF NOT EXISTS user_blocks (
 );
 CREATE INDEX IF NOT EXISTS user_blocks_blocked ON user_blocks(blocked_id);
 
+CREATE TABLE IF NOT EXISTS user_mutes (
+  muter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  muted_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (muter_id, muted_id),
+  CHECK (muter_id != muted_id)
+);
+CREATE INDEX IF NOT EXISTS user_mutes_muted ON user_mutes(muted_id);
+
 CREATE TABLE IF NOT EXISTS reports (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
-import { Ban, Bookmark, Camera, ChevronDown, ChevronLeft, Clapperboard, Flag, Gift, Grid3x3, Menu, MoreHorizontal, Pin, Settings, SquarePlus, UserPlus } from "lucide-react";
+import { Ban, Bookmark, Camera, ChevronDown, ChevronLeft, Clapperboard, Flag, Gift, Grid3x3, Menu, MoreHorizontal, Pin, Settings, VolumeX, SquarePlus, UserPlus } from "lucide-react";
 import { api, compact, useApi, useOnCreated } from "@/lib/client";
 import type { Post, Profile } from "@/lib/types";
 import { useApp } from "@/components/app-context";
@@ -188,6 +188,15 @@ function ProfileContent() {
       setOptionsOpen(false);
       toast("Report sent to moderation.");
     } catch (e) { toast((e as Error).message); }
+  };
+
+  const toggleMute = async () => {
+    try {
+      const result = await api<{ muted: boolean }>(`/api/users/${encodeURIComponent(p.username)}/mute`, { method: p.isMuted ? "DELETE" : "POST" });
+      profileReq.setData({ profile: { ...p, isMuted: result.muted } });
+      setOptionsOpen(false);
+      toast(result.muted ? `@${p.username} muted.` : `@${p.username} unmuted.`);
+    } catch (error) { toast((error as Error).message); }
   };
 
   const avatar = (size: number) =>
@@ -401,7 +410,7 @@ function ProfileContent() {
           }}
         />
       )}
-      {optionsOpen && !p.isMe && <Modal onClose={() => setOptionsOpen(false)} showClose={false} className="w-[360px] max-w-full"><div className="flex flex-col"><button type="button" onClick={() => void blockProfile()} className="flex items-center gap-3 px-5 py-4 text-left font-semibold text-danger"><Ban size={18} />Block @{p.username}</button><button type="button" onClick={() => void reportProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left font-semibold"><Flag size={18} />Report profile</button><button type="button" onClick={() => void shareProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left"><MoreHorizontal size={18} />Copy profile link</button><button type="button" onClick={() => setOptionsOpen(false)} className="border-t border-border px-5 py-4 text-left text-muted">Cancel</button></div></Modal>}
+      {optionsOpen && !p.isMe && <Modal onClose={() => setOptionsOpen(false)} showClose={false} className="w-[360px] max-w-full"><div className="flex flex-col"><button type="button" onClick={() => void toggleMute()} className="flex items-center gap-3 px-5 py-4 text-left font-semibold"><VolumeX size={18} />{p.isMuted ? `Unmute @${p.username}` : `Mute @${p.username}`}</button><button type="button" onClick={() => void blockProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left font-semibold text-danger"><Ban size={18} />Block @{p.username}</button><button type="button" onClick={() => void reportProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left font-semibold"><Flag size={18} />Report profile</button><button type="button" onClick={() => void shareProfile()} className="flex items-center gap-3 border-t border-border px-5 py-4 text-left"><MoreHorizontal size={18} />Copy profile link</button><button type="button" onClick={() => setOptionsOpen(false)} className="border-t border-border px-5 py-4 text-left text-muted">Cancel</button></div></Modal>}
     </div>
   );
 }

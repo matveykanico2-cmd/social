@@ -51,6 +51,7 @@ export type Profile = UserLite & {
   followerCount: number;
   followingCount: number;
   isFollowing: boolean;
+  isMuted: boolean;
   followsYou: boolean;
   isMe: boolean;
   hasStory: boolean;
