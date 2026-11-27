@@ -1,0 +1,17 @@
+services:
+  social:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    ports:
+      - "3000:3000"
+    volumes:
+      - social-data:/app/data
+      - social-uploads:/app/uploads
+
+volumes:
+  social-data:
+  social-uploads:

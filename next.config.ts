@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Build a self-contained server bundle for Docker and other Node runtimes.
+  output: "standalone",
   // Hide the floating "N" dev badge; compile and runtime errors still show.
   devIndicators: false,
   // Let phones on the same network use the dev server (iPhone hotspot and home Wi-Fi addresses).

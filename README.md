@@ -36,6 +36,17 @@ NODE_ENV=production npm run start -- -p 3000
 
 Use a reverse proxy with HTTPS for production WebRTC and Web Push. Set `VAPID_*` when browser push is needed. The SQLite database and `uploads/` directory must be on persistent storage and backed up.
 
+### Docker deployment
+
+```bash
+cp .env.example .env.local
+# fill in the private production values in .env.local
+docker compose up -d --build
+docker compose logs -f social
+```
+
+The application listens on port `3000`. SQLite data and uploaded media are stored in named persistent volumes. Put HTTPS in front of the container with a reverse proxy; do not expose the container directly when using WebRTC, Web Push or SMTP.
+
 For the optional realtime runtime, build the app and run `npm run start:ws`. It exposes an authenticated WebSocket endpoint at `/api/ws`; set `NEXT_PUBLIC_WS_ENABLED=1` (and optionally `NEXT_PUBLIC_WS_URL`) for clients. Standard `npm start` keeps the SSE fallback for deployments without WebSocket upgrade support.
 
 Optional local media/RTC services are defined in `docker-compose.media.yml`: `docker compose -f docker-compose.media.yml up -d`. MinIO, Coturn and MediaMTX still require wiring credentials and public network addresses before production use.
