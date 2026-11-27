@@ -64,8 +64,11 @@ export const PATCH = route(async (req) => {
     avatar = null;
   }
   const coverFile = form.get("cover");
-  if (coverFile instanceof File && coverFile.size > 0) cover = (await saveUpload(coverFile, "image")).url;
-  else if (form.get("removeCover") === "1") {
+  if (coverFile instanceof File && coverFile.size > 0) {
+    const nextCover = (await saveUpload(coverFile, "image")).url;
+    await deleteUpload(me.cover);
+    cover = nextCover;
+  } else if (form.get("removeCover") === "1") {
     await deleteUpload(me.cover);
     cover = null;
   }

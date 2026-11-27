@@ -26,6 +26,7 @@ export default function EditProfilePage() {
   const sessions = useApi<{ sessions: { id: string; current: boolean; createdAt: number }[] }>("/api/auth/sessions");
   const [saving, setSaving] = useState(false);
   const [photoMenu, setPhotoMenu] = useState(false);
+  const [coverMenu, setCoverMenu] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const coverInput = useRef<HTMLInputElement>(null);
 
@@ -160,7 +161,7 @@ export default function EditProfilePage() {
         />
       </div>
       <div className="mb-8 rounded-2xl border border-border p-4">
-        <div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="font-bold">Profile cover</h2><p className="text-sm text-muted">A wide image shown behind your profile on desktop and mobile.</p></div><PrimaryButton type="button" onClick={() => coverInput.current?.click()}>Change cover</PrimaryButton></div>
+        <div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="font-bold">Profile cover</h2><p className="text-sm text-muted">A wide image shown behind your profile on desktop and mobile.</p></div><PrimaryButton type="button" onClick={() => (me.cover ? setCoverMenu(true) : coverInput.current?.click())}>Change cover</PrimaryButton></div>
         <div className="h-24 overflow-hidden rounded-xl bg-[linear-gradient(115deg,#447bba,#6f9dcc_48%,#b7cce1)] bg-cover bg-center" style={me.cover ? { backgroundImage: `url(${me.cover})` } : undefined} />
         <input ref={coverInput} hidden type="file" accept="image/*" onChange={(event) => { void uploadCover(event.target.files?.[0]); event.target.value = ""; }} />
       </div>
@@ -270,6 +271,29 @@ export default function EditProfilePage() {
                 fd.append("removeAvatar", "1");
                 await send(fd);
                 toast("Profile photo removed.");
+              },
+            },
+          ]}
+        />
+      )}
+      {coverMenu && (
+        <OptionsMenu
+          onClose={() => setCoverMenu(false)}
+          options={[
+            { label: "Upload cover", bold: true, onClick: () => (setCoverMenu(false), coverInput.current?.click()) },
+            {
+              label: "Remove current cover",
+              danger: true,
+              onClick: async () => {
+                setCoverMenu(false);
+                try {
+                  const fd = new FormData();
+                  fd.append("removeCover", "1");
+                  await send(fd);
+                  toast("Profile cover removed.");
+                } catch (error) {
+                  toast((error as Error).message);
+                }
               },
             },
           ]}
