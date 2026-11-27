@@ -3,6 +3,7 @@ import { get, run } from "@/lib/server/db";
 import { currentUser, requireUser, USERNAME_RE, type UserRow } from "@/lib/server/auth";
 import { saveUpload, deleteUpload } from "@/lib/server/media";
 import type { Me } from "@/lib/types";
+import { normalizeEmail, normalizePhone } from "@/lib/server/identity";
 
 const toMe = (u: UserRow): Me => ({
   id: u.id,
@@ -37,8 +38,8 @@ export const PATCH = route(async (req) => {
   const lastName = field("lastName", me.last_name).slice(0, 40);
   const bio = field("bio", me.bio).slice(0, 150);
   const website = field("website", me.website).slice(0, 200);
-  const email = field("email", me.email);
-  const phone = field("phone", me.phone ?? "");
+  const email = normalizeEmail(field("email", me.email));
+  const phone = normalizePhone(field("phone", me.phone ?? ""));
   const privateAccount = form.has("privateAccount") ? form.get("privateAccount") === "1" : !!me.private_account;
   const showActivity = form.has("showActivity") ? form.get("showActivity") === "1" : !!me.show_activity;
   const allowMessages = form.has("allowMessages") ? form.get("allowMessages") === "1" : !!me.allow_messages;

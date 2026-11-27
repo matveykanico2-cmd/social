@@ -2,6 +2,7 @@ import { route, jsonBody, HttpError } from "@/lib/server/http";
 import { connectedAccounts, connectAccount, disconnectAccount, requireUser, switchSession, verifyPassword } from "@/lib/server/auth";
 import { get, run } from "@/lib/server/db";
 import { decryptTotpSecret, verifyTotp } from "@/lib/server/totp";
+import { normalizeEmail, normalizePhone } from "@/lib/server/identity";
 
 export const GET = route(async () => {
   await requireUser();
@@ -14,8 +15,10 @@ export const POST = route(async (req) => {
     await switchSession(Number(body.userId));
     return { ok: true };
   }
-  const login = String(body.login ?? "").trim();
-  const user = get<{ id: number; password_hash: string; totp_secret: string | null; totp_last_counter: number }>("SELECT id, password_hash, totp_secret, totp_last_counter FROM users WHERE username = ? OR email = ? OR phone = ?", login, login, login);
+  const rawLogin = String(body.login ?? "").trim();
+  const login = rawLogin.includes("@") ? normalizeEmail(rawLogin) : /^[+\d\s()-]+$/.test(rawLogin) ? normalizePhone(rawLogin) : rawLogin.toLowerCase();
+  const username = rawLogin.toLowerCase();
+  const user = get<{ id: number; password_hash: string; totp_secret: string | null; totp_last_counter: number }>("SELECT id, password_hash, totp_secret, totp_last_counter FROM users WHERE username = ? OR email = ? OR phone = ?", username, login, login);
   if (!user || !verifyPassword(String(body.password ?? ""), user.password_hash)) throw new HttpError(401, "Incorrect account credentials.");
   if (user.totp_secret) {
     const counter = verifyTotp(decryptTotpSecret(user.totp_secret), String(body.totpCode ?? ""), user.totp_last_counter);

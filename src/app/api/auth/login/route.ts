@@ -3,13 +3,16 @@ import { get, run } from "@/lib/server/db";
 import { decryptTotpSecret, verifyTotp } from "@/lib/server/totp";
 import { startSession, verifyPassword } from "@/lib/server/auth";
 import { audit } from "@/lib/server/audit";
+import { normalizeEmail, normalizePhone } from "@/lib/server/identity";
 
 export const POST = route(async (req) => {
   const body = await jsonBody<{ login: string; password: string; totpCode?: string }>(req);
-  const login = String(body.login ?? "").trim();
+  const rawLogin = String(body.login ?? "").trim();
+  const login = rawLogin.includes("@") ? normalizeEmail(rawLogin) : /^[+\d\s()-]+$/.test(rawLogin) ? normalizePhone(rawLogin) : rawLogin.toLowerCase();
+  const username = rawLogin.toLowerCase();
   const user = get<{ id: number; password_hash: string; totp_secret: string | null; totp_last_counter: number }>(
     "SELECT id, password_hash, totp_secret, totp_last_counter FROM users WHERE username = ? OR email = ? OR phone = ?",
-    login,
+    username,
     login,
     login,
   );

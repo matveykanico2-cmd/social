@@ -2,6 +2,7 @@ import { route, jsonBody, HttpError } from "@/lib/server/http";
 import { get, run, now } from "@/lib/server/db";
 import { hashPassword, startSession, USERNAME_RE } from "@/lib/server/auth";
 import { saveUpload } from "@/lib/server/media";
+import { normalizeEmail, normalizePhone } from "@/lib/server/identity";
 
 export const POST = route(async (req) => {
   const multipart = req.headers.get("content-type")?.includes("multipart/form-data") ?? false;
@@ -14,8 +15,8 @@ export const POST = route(async (req) => {
     username: String(form?.get("username") ?? ""),
     password: String(form?.get("password") ?? ""),
   } : await jsonBody<{ email: string; phone: string; name: string; lastName?: string; username: string; password: string }>(req);
-  const email = String(body.email ?? "").trim();
-  const phone = String(body.phone ?? "").trim();
+  const email = normalizeEmail(String(body.email ?? ""));
+  const phone = normalizePhone(String(body.phone ?? ""));
   const name = String(body.name ?? "").trim();
   const lastName = String(body.lastName ?? "").trim().slice(0, 40);
   const username = String(body.username ?? "").trim().toLowerCase();

@@ -1,11 +1,12 @@
 import crypto from "node:crypto";
 import { route, jsonBody, HttpError } from "@/lib/server/http";
 import { get, run, now } from "@/lib/server/db";
+import { normalizeEmail, normalizePhone } from "@/lib/server/identity";
 
 export const POST = route(async (req) => {
   const body = await jsonBody<{ email?: string; phone?: string }>(req);
-  const email = String(body.email ?? "").trim().toLowerCase();
-  const phone = String(body.phone ?? "").trim();
+  const email = normalizeEmail(String(body.email ?? ""));
+  const phone = normalizePhone(String(body.phone ?? ""));
   if (!email || !phone) throw new HttpError(400, "Enter both email and phone number.");
   const user = get<{ id: number }>("SELECT id FROM users WHERE lower(email) = ? AND phone = ?", email, phone);
   if (!user) throw new HttpError(400, "Email and phone number do not match.");
