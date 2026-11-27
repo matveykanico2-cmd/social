@@ -24,4 +24,4 @@ Marketplace реализован как единая Social-модель объ�
 
 ## Текущая проверка
 
-`npm run check` проходит: ESLint, TypeScript, 76 Vitest-тестов и production build с 70 маршрутами. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.
+`npm run check` проходит: ESLint, TypeScript, 77 Vitest-тестов и production build с 71 маршрутом. Строки со статусом `partial`, `blocked` и `todo` намеренно не отмечены как завершённые.

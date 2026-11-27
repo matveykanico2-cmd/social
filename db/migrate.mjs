@@ -40,6 +40,7 @@ const ADDED_COLUMNS = [
   ["users", "show_activity", "INTEGER NOT NULL DEFAULT 1"],
   ["users", "allow_messages", "INTEGER NOT NULL DEFAULT 1"],
   ["users", "cover", "TEXT"],
+  ["orders", "marketplace_listing_id", "INTEGER REFERENCES marketplace_listings(id) ON DELETE SET NULL"],
   ["users", "last_seen_at", "INTEGER"],
   ["posts", "archived_at", "INTEGER"],
   ["comments", "attachment_url", "TEXT"],

@@ -383,6 +383,7 @@ CREATE TABLE IF NOT EXISTS orders (
   seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   buyer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   conversation_id INTEGER REFERENCES conversations(id) ON DELETE SET NULL,
+  marketplace_listing_id INTEGER REFERENCES marketplace_listings(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'quoted', -- quoted | agreed | in_progress | delivered | paid | cancelled
   total_fils INTEGER NOT NULL DEFAULT 0, -- JOD × 1000
@@ -392,6 +393,17 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 CREATE INDEX IF NOT EXISTS orders_seller ON orders(seller_id);
 CREATE INDEX IF NOT EXISTS orders_buyer ON orders(buyer_id);
+
+CREATE TABLE IF NOT EXISTS marketplace_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+  author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  text TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS marketplace_reviews_seller ON marketplace_reviews(seller_id, created_at);
 
 CREATE TABLE IF NOT EXISTS order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -16,10 +16,10 @@
 | Notifications | likes, comments, follows, friend requests, push foundation, read state | category preferences, event deduplication, full email categories | `/api/notifications`, panels; build |
 | Live | rooms, viewers, route/UI | RTMP, recording, guests, realtime moderation | `/api/live`; build |
 | Professional tools | business flag/category, admin panel, server stats | creator analytics dashboard, scheduler, ads cabinet | admin/settings; build |
-| Commerce | Marketplace listings, image, categories, search, seller chat, admin removal, gifts | payments, orders, anti-fraud, payouts | `/marketplace`, `/api/marketplace`; build |
+| Commerce | Marketplace listings, image, categories, search, seller chat, order lifecycle, order history, post-payment reviews, admin removal, gifts | payment provider, webhook signature verification, anti-fraud scoring, payouts | `/marketplace`, `/api/marketplace/orders`; build + 77 tests |
 | Security/moderation | HTTP-only sessions, ownership checks, blocks, reports, admin roles, MIME/size limits, file signature checks, write/auth rate limits, Origin checks, security headers, encrypted TOTP, audit entries and admin audit viewer | passkeys, OAuth, AV quarantine | auth/admin/media/security/totp; build + 76 tests |
 | UX/mobile | responsive nav, themes, avatar fallback, loading/error boundaries, PWA manifest, Russian default | Playwright viewport matrix, native Android/Desktop, offline queue | CSS/nav/PWA; production build |
 
 ## Verification
 
-`npm run check` is the required gate: ESLint, TypeScript, Vitest and production build. Current code passes 76 tests and builds 70 routes. Infrastructure-dependent items remain explicitly marked instead of being represented by mock buttons.
+`npm run check` is the required gate: ESLint, TypeScript, Vitest and production build. Current code passes 77 tests and builds 71 routes. Infrastructure-dependent items remain explicitly marked instead of being represented by mock buttons.
