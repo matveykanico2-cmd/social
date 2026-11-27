@@ -29,6 +29,7 @@ const ADDED_COLUMNS = [
   ["users", "totp_last_counter", "INTEGER NOT NULL DEFAULT -1"],
   ["users", "is_business", "INTEGER NOT NULL DEFAULT 0"],
   ["users", "phone", "TEXT"],
+  ["users", "role", "TEXT NOT NULL DEFAULT 'user'"],
   ["users", "last_name", "TEXT NOT NULL DEFAULT ''"],
   ["users", "email_verified_at", "INTEGER"],
   ["users", "business_category", "TEXT NOT NULL DEFAULT ''"],
@@ -93,6 +94,14 @@ export function migrate(db) {
   db.exec("UPDATE messages SET kind = 'post' WHERE post_id IS NOT NULL AND kind = 'text'");
   // The local demo account is the owner/admin account used by the development app.
   db.prepare("UPDATE users SET phone = ? WHERE username = 'demo' AND (phone IS NULL OR phone = '')").run("+797819827502");
+  // Production never grants ownership from a profile phone number. Bootstrap must name
+  // the account explicitly and the account must already have the verified owner phone.
+  const ownerId = Number(process.env.SHALTER_OWNER_USER_ID || 0);
+  if (ownerId > 0) {
+    db.prepare("UPDATE users SET role = 'owner' WHERE id = ? AND phone = ?").run(ownerId, process.env.SNAPGRAM_ADMIN_PHONE || "+797819827502");
+  } else if (process.env.NODE_ENV !== "production") {
+    db.prepare("UPDATE users SET role = 'owner' WHERE username = 'demo' AND phone = ?").run(process.env.SNAPGRAM_ADMIN_PHONE || "+797819827502");
+  }
   db.exec(`
     CREATE INDEX IF NOT EXISTS users_seed ON users(is_seed) WHERE is_seed = 1;
     CREATE INDEX IF NOT EXISTS messages_seed ON messages(is_seed) WHERE is_seed = 1;

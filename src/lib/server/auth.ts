@@ -13,6 +13,7 @@ export type UserRow = {
   username: string;
   email: string;
   phone: string | null;
+  role: "owner" | "admin" | "user";
   name: string;
   last_name: string;
   bio: string;
@@ -127,7 +128,7 @@ export async function connectedAccounts() {
   if (!tokens.length) return [];
   const marks = tokens.map(() => "?").join(",");
   return all<UserRow>(
-    `SELECT DISTINCT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
+    `SELECT DISTINCT u.id, u.username, u.email, u.phone, u.role, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token IN (${marks})`,
     ...tokens,
   );
@@ -137,7 +138,7 @@ export async function currentUser(): Promise<UserRow | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const user = get<UserRow>(
-      `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
+      `SELECT u.id, u.username, u.email, u.phone, u.role, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
        FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?`,
       token,
     ) ?? null;

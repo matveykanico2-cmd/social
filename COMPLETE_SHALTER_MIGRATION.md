@@ -28,7 +28,7 @@ Social остаётся единым приложением и единой ба
 | Gifts and stickers catalog | profile/direct | `/api/gifts`, `/api/stickers` | gift picker, sticker picker | build | Перенесено |
 | Search, hashtags, places, trends | search/explore | `/api/search`, posts/users | SearchBox, explore | Vitest + build | Перенесено |
 | Insights and audit | `/insights`, `/admin` | `/api/insights`, `/api/admin/audit` | dashboards/tables | build | Перенесено |
-| Admin moderation and server status | `/admin` | protected `/api/admin/*`, audit log | responsive admin panel | API auth checks + build | Перенесено частично |
+| Admin moderation and server status | `/admin` | protected `/api/admin/*`, role migration, audit log | responsive admin panel with user roles | API auth checks + build | Перенесено частично |
 | Push notifications | settings | `/api/push/*`, subscriptions | settings action | build | Перенесено с конфигурацией |
 | TOTP / 2FA | settings/login | `/api/auth/totp`, encrypted secret | setup/challenge UI | unit/API contract | Перенесено |
 

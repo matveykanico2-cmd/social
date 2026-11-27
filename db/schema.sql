@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE COLLATE NOCASE,
   email_verified_at INTEGER,
   phone TEXT UNIQUE,
+  role TEXT NOT NULL DEFAULT 'user',
   name TEXT NOT NULL DEFAULT '',
   last_name TEXT NOT NULL DEFAULT '',
   password_hash TEXT NOT NULL,

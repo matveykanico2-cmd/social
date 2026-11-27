@@ -8,12 +8,22 @@ function normalizePhone(phone: string | null | undefined) {
   return (phone ?? "").replace(/[\s()-]/g, "");
 }
 
-export function isAdmin(user: Pick<UserRow, "phone">) {
-  return normalizePhone(user.phone) === normalizePhone(ADMIN_PHONE);
+export function isAdmin(user: Pick<UserRow, "phone" | "role">) {
+  return (user.role === "owner" || user.role === "admin") && normalizePhone(user.phone) === normalizePhone(ADMIN_PHONE);
+}
+
+export function isOwner(user: Pick<UserRow, "phone" | "role">) {
+  return user.role === "owner" && normalizePhone(user.phone) === normalizePhone(ADMIN_PHONE);
 }
 
 export async function requireAdmin() {
   const user = await requireUser();
   if (!isAdmin(user)) throw new HttpError(403, "Admin access is required.");
+  return user;
+}
+
+export async function requireOwner() {
+  const user = await requireUser();
+  if (!isOwner(user)) throw new HttpError(403, "Owner access is required.");
   return user;
 }

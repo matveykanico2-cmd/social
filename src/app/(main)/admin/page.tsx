@@ -7,7 +7,7 @@ import { PrimaryButton, Verified } from "@/components/ui";
 
 type Overview = {
   stats: { users: number; posts: number; stories: number; messages: number; conversations: number; channels: number; communities: number; live: number; reports: number };
-  users: { id: number; username: string; name: string; phone: string | null; verified: number; created_at: number }[];
+  users: { id: number; username: string; name: string; phone: string | null; role: "owner" | "admin" | "user"; verified: number; created_at: number }[];
   posts: { id: number; username: string; caption: string; type: string; created_at: number }[];
   reports: { id: number; reporter: string; target_type: string; target_id: number; reason: string; status: string; created_at: number }[];
 };
@@ -40,6 +40,12 @@ export default function AdminPage() {
   const toggleVerified = async (user: Overview["users"][number]) => {
     await api(`/api/admin/users/${user.id}`, { method: "PATCH", body: { verified: !user.verified } });
     reload();
+  };
+
+  const changeRole = async (user: Overview["users"][number], role: "admin" | "user") => {
+    if (!window.confirm(`${role === "admin" ? "Grant" : "Remove"} admin access for @${user.username}?`)) return;
+    try { await api(`/api/admin/users/${user.id}`, { method: "PATCH", body: { role } }); reload(); }
+    catch (error) { window.alert((error as Error).message); }
   };
 
   const testMail = async () => {
@@ -81,7 +87,7 @@ export default function AdminPage() {
         <section id="admin-users" className="vk-card scroll-mt-20 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="flex items-center gap-2 font-semibold">Users <UserCheck size={18} className="text-muted" /></h2><label className="flex min-w-[190px] flex-1 items-center gap-2 rounded-lg bg-field px-3 py-2 text-muted sm:max-w-[260px]"><Search size={16} /><input value={userQuery} onChange={(event) => setUserQuery(event.target.value)} placeholder="Find user" className="min-w-0 flex-1 bg-transparent text-sm text-fg outline-none" /></label></div>
           <div className="divide-y divide-border">
-            {filteredUsers.map((user) => <div key={user.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-1 truncate font-semibold">@{user.username} {user.verified ? <Verified size={14} /> : null}</div><div className="truncate text-xs text-muted">{user.name || "No name"} · {date(user.created_at)}</div></div>{user.phone && <span className="hidden text-xs text-muted sm:block">{user.phone}</span>}<button type="button" onClick={() => void toggleVerified(user)} aria-label={user.verified ? `Remove verification from ${user.username}` : `Verify ${user.username}`} title={user.verified ? "Remove verification" : "Verify account"} className={`rounded-lg px-2 py-1 text-xs font-semibold ${user.verified ? "bg-link/10 text-link" : "bg-field text-muted hover:text-fg"}`}>{user.verified ? "Verified" : "Verify"}</button><button type="button" onClick={() => void removeUser(user.id, user.username)} aria-label={`Delete ${user.username}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
+            {filteredUsers.map((user) => <div key={user.id} className="flex items-center gap-3 px-4 py-3"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-1 truncate font-semibold">@{user.username} {user.verified ? <Verified size={14} /> : null}</div><div className="truncate text-xs text-muted">{user.name || "No name"} · {date(user.created_at)}</div></div>{user.phone && <span className="hidden text-xs text-muted sm:block">{user.phone}</span>}<span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${user.role === "owner" ? "bg-amber-500/10 text-amber-700" : user.role === "admin" ? "bg-link/10 text-link" : "bg-field text-muted"}`}>{user.role}</span>{user.role !== "owner" && <button type="button" onClick={() => void changeRole(user, user.role === "admin" ? "user" : "admin")} className="hidden rounded-lg bg-field px-2 py-1 text-xs font-semibold hover:bg-hover sm:block">{user.role === "admin" ? "Remove admin" : "Make admin"}</button>}<button type="button" onClick={() => void toggleVerified(user)} aria-label={user.verified ? `Remove verification from ${user.username}` : `Verify ${user.username}`} title={user.verified ? "Remove verification" : "Verify account"} className={`rounded-lg px-2 py-1 text-xs font-semibold ${user.verified ? "bg-link/10 text-link" : "bg-field text-muted hover:text-fg"}`}>{user.verified ? "Verified" : "Verify"}</button><button type="button" onClick={() => void removeUser(user.id, user.username)} aria-label={`Delete ${user.username}`} className="rounded p-2 text-danger hover:bg-hover"><Trash2 size={17} /></button></div>)}
             {!filteredUsers.length && <p className="px-4 py-8 text-center text-sm text-muted">No users match this search.</p>}
           </div>
         </section>

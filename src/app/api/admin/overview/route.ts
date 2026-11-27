@@ -16,8 +16,8 @@ export const GET = route(async () => {
       live: get<{ n: number }>("SELECT COUNT(*) AS n FROM live_streams WHERE status = 'live'")!.n,
       reports: get<{ n: number }>("SELECT COUNT(*) AS n FROM reports WHERE status = 'open'")!.n,
     },
-    users: all<{ id: number; username: string; name: string; phone: string | null; verified: number; created_at: number }>(
-      "SELECT id, username, name, phone, verified, created_at FROM users ORDER BY id DESC LIMIT 30",
+    users: all<{ id: number; username: string; name: string; phone: string | null; role: "owner" | "admin" | "user"; verified: number; created_at: number }>(
+      "SELECT id, username, name, phone, role, verified, created_at FROM users ORDER BY id DESC LIMIT 30",
     ),
     posts: all<{ id: number; username: string; caption: string; type: string; created_at: number }>(
       `SELECT p.id, u.username, p.caption, p.type, p.created_at
