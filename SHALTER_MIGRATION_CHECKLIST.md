@@ -1,7 +1,7 @@
 # SHALTER → SOCIAL migration checklist
 
-Audit source: `/tmp/shalter-upstream.4Zs9CB` (clone of `matveykanico2-cmd/Shalter`).  
-Destination: `matveykanico2-cmd/social`, branch `feature/full-shalter-migration`.  
+Audit source: `/tmp/shalter-upstream.4Zs9CB` (clone of `matveykanico2-cmd/Shalter`).
+Destination: `matveykanico2-cmd/social`, branch `feature/full-shalter-migration`.
 The donor repository is read-only for this migration.
 
 Status meanings: **done** = implemented in the unified Social runtime; **partial** = an equivalent exists but some donor capabilities remain; **todo** = not yet integrated.
