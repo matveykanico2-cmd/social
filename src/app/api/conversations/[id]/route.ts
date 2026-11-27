@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/server/auth";
 import { updateChatSettings, updateConversationTheme } from "@/lib/server/dm";
 
 const THEMES = new Set(["default", "midnight", "sunset", "forest", "ocean"]);
-const WALLPAPERS = new Set(["default", "dots", "stars", "waves", "sunset"]);
+const WALLPAPERS = new Set(["default", "dots", "stars", "waves", "sunset", "grid", "hearts", "paper", "neon", "confetti"]);
 
 export const PATCH = route(async (req, { params }: { params: Promise<{ id: string }> }) => {
   const me = await requireUser();

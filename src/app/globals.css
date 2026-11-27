@@ -57,6 +57,11 @@
 :root .chat-wallpaper-stars .chat-thread { background-image: radial-gradient(rgba(124, 58, 237, .2) 1px, transparent 1px), radial-gradient(rgba(236, 72, 153, .15) 1px, transparent 1px); background-position: 0 0, 9px 9px; background-size: 18px 18px; }
 :root .chat-wallpaper-waves .chat-thread { background-image: repeating-radial-gradient(ellipse at 0 0, transparent 0 18px, rgba(37, 99, 235, .12) 19px 20px); }
 :root .chat-wallpaper-sunset .chat-thread { background-image: linear-gradient(135deg, rgba(251, 113, 133, .12), rgba(245, 158, 11, .15)); }
+:root .chat-wallpaper-grid .chat-thread { background-image: linear-gradient(rgba(0,149,246,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,149,246,.08) 1px, transparent 1px); background-size: 22px 22px; }
+:root .chat-wallpaper-hearts .chat-thread { background-image: radial-gradient(circle at 20% 20%, rgba(236,72,153,.18) 0 5px, transparent 6px), radial-gradient(circle at 75% 65%, rgba(244,63,94,.16) 0 5px, transparent 6px); background-size: 44px 44px; }
+:root .chat-wallpaper-paper .chat-thread { background-color: rgba(148,163,184,.08); background-image: repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(100,116,139,.1) 24px); }
+:root .chat-wallpaper-neon .chat-thread { background-image: radial-gradient(circle at 50% 0%, rgba(168,85,247,.22), transparent 52%), linear-gradient(135deg, rgba(6,182,212,.08), transparent); }
+:root .chat-wallpaper-confetti .chat-thread { background-image: radial-gradient(circle, rgba(245,158,11,.2) 0 2px, transparent 3px), radial-gradient(circle, rgba(59,130,246,.18) 0 2px, transparent 3px); background-position: 0 0, 13px 17px; background-size: 31px 37px; }
 
 :root[data-theme="dark"] .chat-thread {
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, #4a5df9 12%), var(--bg) 42%);

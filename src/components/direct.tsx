@@ -536,7 +536,7 @@ function Thread({ id }: { id: number }) {
   };
 
   const cycleWallpaper = async () => {
-    const wallpapers = ["default", "dots", "stars", "waves", "sunset"];
+    const wallpapers = ["default", "dots", "stars", "waves", "sunset", "grid", "hearts", "paper", "neon", "confetti"];
     const next = wallpapers[(wallpapers.indexOf(chatWallpaper) + 1) % wallpapers.length];
     setChatWallpaper(next);
     try { await api(`/api/conversations/${id}`, { method: "PATCH", body: { wallpaper: next } }); }

@@ -14,7 +14,25 @@ export const GET = route(async (_req, { params }: Ctx) => {
   const t = now();
   run("INSERT OR REPLACE INTO live_viewers (stream_id, user_id, joined_at, last_seen_at) VALUES (?, ?, COALESCE((SELECT joined_at FROM live_viewers WHERE stream_id = ? AND user_id = ?), ?), ?)", id, me.id, id, me.id, t, t);
   const viewers = all<{ uid: number; username: string; name: string; avatar: string | null; verified: number }>("SELECT u.id AS uid, u.username, u.name, u.avatar, u.verified FROM live_viewers v JOIN users u ON u.id = v.user_id WHERE v.stream_id = ? ORDER BY v.joined_at LIMIT 50", id);
-  return { stream: { id: row.id, title: row.title, description: row.description, host: userLite(row), status: row.status, createdAt: row.created_at, viewerCount: viewers.length, viewers: viewers.map(userLite), isHost: row.host_id === me.id } };
+  const after = Number(new URL(_req.url).searchParams.get("after")) || 0;
+  const messages = all<{ id: number; text: string; created_at: number; uid: number; username: string; name: string; avatar: string | null; verified: number }>(
+    `SELECT m.id, m.text, m.created_at, u.id AS uid, u.username, u.name, u.avatar, u.verified
+     FROM live_chat_messages m JOIN users u ON u.id = m.user_id
+     WHERE m.stream_id = ? AND m.id > ? ORDER BY m.id LIMIT 100`, id, after,
+  );
+  return { stream: { id: row.id, title: row.title, description: row.description, host: userLite(row), status: row.status, createdAt: row.created_at, viewerCount: viewers.length, viewers: viewers.map(userLite), isHost: row.host_id === me.id }, messages: messages.map((message) => ({ id: message.id, text: message.text, createdAt: message.created_at, user: userLite(message) })) };
+});
+
+export const POST = route(async (req, { params }: Ctx) => {
+  const me = await requireUser();
+  const id = intParam((await params).id);
+  const body = await jsonBody<{ text?: string }>(req);
+  const stream = get<{ status: string }>("SELECT status FROM live_streams WHERE id = ?", id);
+  if (!stream || stream.status !== "live") throw new HttpError(404, "Live stream is not active.");
+  const text = String(body.text ?? "").trim().slice(0, 500);
+  if (!text) throw new HttpError(400, "Write a message first.");
+  const created = run("INSERT INTO live_chat_messages (stream_id, user_id, text, created_at) VALUES (?, ?, ?, ?)", id, me.id, text, now());
+  return { id: created.id };
 });
 
 export const PATCH = route(async (req, { params }: Ctx) => {

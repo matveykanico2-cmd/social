@@ -319,6 +319,15 @@ CREATE TABLE IF NOT EXISTS live_viewers (
 );
 CREATE INDEX IF NOT EXISTS live_viewers_stream ON live_viewers(stream_id);
 
+CREATE TABLE IF NOT EXISTS live_chat_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  stream_id INTEGER NOT NULL REFERENCES live_streams(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS live_chat_messages_stream ON live_chat_messages(stream_id, id);
+
 CREATE TABLE IF NOT EXISTS notifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
