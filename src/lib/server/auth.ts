@@ -57,6 +57,38 @@ export async function startSession(userId: number) {
   });
 }
 
+/** Connects another account to this browser without switching away from the current account. */
+export async function connectAccount(userId: number) {
+  const token = crypto.randomBytes(32).toString("hex");
+  run("INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, userId, now());
+  const store = await cookies();
+  const tokens = readAccountTokens(store.get(ACCOUNT_COOKIE)?.value);
+  if (!tokens.includes(token)) tokens.unshift(token);
+  store.set(ACCOUNT_COOKIE, JSON.stringify(tokens.slice(0, 8)), cookieOptions());
+}
+
+/** Removes an account's browser session(s), never its profile or content. */
+export async function disconnectAccount(userId: number) {
+  const store = await cookies();
+  const current = store.get(SESSION_COOKIE)?.value;
+  const tokens = readAccountTokens(store.get(ACCOUNT_COOKIE)?.value);
+  const targetTokens = all<{ token: string }>(
+    `SELECT token FROM sessions WHERE user_id = ? AND token IN (${tokens.length ? tokens.map(() => "?").join(",") : "NULL"})`,
+    userId,
+    ...tokens,
+  ).map((row) => row.token);
+  if (!targetTokens.length) throw new HttpError(404, "This account is not connected to this browser.");
+  for (const token of targetTokens) run("DELETE FROM sessions WHERE token = ?", token);
+  const remaining = tokens.filter((token) => !targetTokens.includes(token));
+  if (targetTokens.includes(current ?? "")) {
+    const next = remaining[0];
+    if (next) store.set(SESSION_COOKIE, next, cookieOptions());
+    else store.delete(SESSION_COOKIE);
+  }
+  if (remaining.length) store.set(ACCOUNT_COOKIE, JSON.stringify(remaining), cookieOptions());
+  else store.delete(ACCOUNT_COOKIE);
+}
+
 function cookieOptions() {
   return { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_MAX_AGE };
 }
@@ -95,7 +127,7 @@ export async function connectedAccounts() {
   if (!tokens.length) return [];
   const marks = tokens.map(() => "?").join(",");
   return all<UserRow>(
-    `SELECT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
+    `SELECT DISTINCT u.id, u.username, u.email, u.phone, u.name, u.last_name, u.bio, u.website, u.avatar, u.cover, u.last_seen_at, u.verified, u.private_account, u.show_activity, u.allow_messages, u.created_at
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token IN (${marks})`,
     ...tokens,
   );

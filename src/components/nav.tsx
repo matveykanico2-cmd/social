@@ -84,6 +84,7 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
   const [accounts, setAccounts] = useState<{ id: number; username: string; name: string; avatar: string | null }[]>([]);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,9 +98,10 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      await api("/api/auth/accounts", { method: "POST", body: { login, password } });
+      await api("/api/auth/accounts", { method: "POST", body: { login, password, totpCode: totpCode || undefined } });
       setLogin("");
       setPassword("");
+      setTotpCode("");
       await load();
     } catch (e) {
       setError((e as Error).message);
@@ -125,7 +127,7 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
           <button key={account.id} onClick={() => void switchTo(account.id)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-hover">
             <Avatar src={account.avatar} size={42} />
             <span className="min-w-0 flex-1"><span className="block truncate font-semibold">{account.username}</span><span className="block truncate text-xs text-muted">{account.name}</span></span>
-            {account.id === me.id && <Check size={18} className="text-link" />}
+            {account.id === me.id ? <Check size={18} className="text-link" /> : <button type="button" aria-label={`Remove ${account.username} from this device`} onClick={(event) => { event.stopPropagation(); void api("/api/auth/accounts", { method: "DELETE", body: { userId: account.id } }).then(load); }} className="rounded-full px-2 text-muted hover:bg-hover hover:text-danger">×</button>}
           </button>
         ))}
       </div>
@@ -133,6 +135,7 @@ function AccountsModal({ onClose }: { onClose: () => void }) {
         <div className="mb-3 text-sm font-semibold">Add account</div>
         <input value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Username or email" className="mb-2 w-full rounded-lg bg-field px-3 py-2 outline-none" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" className="mb-3 w-full rounded-lg bg-field px-3 py-2 outline-none" />
+        <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" maxLength={6} placeholder="2FA code (if enabled)" className="mb-3 w-full rounded-lg bg-field px-3 py-2 outline-none" />
         {error && <div className="mb-2 text-xs text-danger">{error}</div>}
         <button disabled={busy || !login || password.length < 6} className="flex w-full items-center justify-center gap-2 rounded-lg bg-link px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"><UserRoundPlus size={16} />{busy ? "Adding..." : "Add account"}</button>
       </form>

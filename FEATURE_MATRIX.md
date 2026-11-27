@@ -4,7 +4,7 @@
 
 | Раздел | Реализовано | Ограничения | Код / проверка |
 |---|---|---|---|
-| Accounts and login | email/phone signup, sessions, recovery, password, multi-account, language, theme, encrypted TOTP/2FA setup and replay-protected login challenge | passkeys, OAuth, age policy | `src/app/(auth)`, `/api/auth/totp`; build + 76 tests |
+| Accounts and login | email/phone signup, sessions, recovery, password, unique multi-account connections, language, theme, encrypted TOTP/2FA setup and replay-protected login challenge | passkeys, OAuth, age policy | `src/app/(auth)`, `/api/auth/accounts`, `/api/auth/totp`; build + 78 tests |
 | Profiles | avatar, cover, username, bio, links, tabs, follow, friend request, message, gifts, highlights | QR, full business contacts, pinned posts | `src/app/(main)/[username]`; build |
 | Feed and Explore | feed, explore, search, saves, likes, recommendations | full ranking, trends, hashtags, places | `/api/feed`, `/api/explore`, `/api/search`; build |
 | Posts | photo/video carousel, captions, location, edit/delete, share, comments, replies, attachments, reactions | crop/filter editor, mentions/hashtags parsing, drafts/scheduling/collabs | `/api/posts`, `PostView`; build + 66 tests |
