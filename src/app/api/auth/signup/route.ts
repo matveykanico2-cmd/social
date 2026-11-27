@@ -15,7 +15,7 @@ export const POST = route(async (req) => {
   if (!/^\+?[0-9\s()-]{7,20}$/.test(phone)) throw new HttpError(400, "Enter a valid phone number.");
   if (!USERNAME_RE.test(username))
     throw new HttpError(400, "Usernames can only use letters, numbers, underscores and periods.");
-  if (password.length < 6) throw new HttpError(400, "Create a password at least 6 characters long.");
+  if (password.length < 8) throw new HttpError(400, "Create a password at least 8 characters long.");
   if (get("SELECT 1 FROM users WHERE username = ?", username))
     throw new HttpError(409, "This username isn't available. Please try another.");
   if (get("SELECT 1 FROM users WHERE email = ?", email))

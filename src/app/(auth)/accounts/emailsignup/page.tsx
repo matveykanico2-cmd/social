@@ -21,7 +21,7 @@ export default function SignupPage() {
   const valid = {
     email: /^\S+@\S+\.\S+$/.test(form.email),
     phone: /^\+?[0-9\s()-]{7,20}$/.test(form.phone),
-    password: form.password.length >= 6,
+    password: form.password.length >= 8,
     username: /^[a-z0-9._]{1,30}$/.test(form.username),
   };
 
