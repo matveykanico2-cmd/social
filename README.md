@@ -53,7 +53,7 @@ Optional local media/RTC services are defined in `docker-compose.media.yml`: `do
 
 ## Features
 
-- **Accounts**: sign up with email, phone, username, name and last name; log in with any identifier, recover/change an 8+ character password, use TOTP and switch multiple accounts.
+- **Accounts**: sign up with email, phone, username, name, last name and optional profile avatar; log in with any identifier, recover/change an 8+ character password, use TOTP and switch multiple accounts.
 - **Feed**: posts from people you follow, infinite scroll, double-tap to like, photo/video carousels, comments, saves, sharing by DM, and "Suggested for you".
 - **Create**: drag and drop up to 10 photos or videos, then add a caption and location. A single video becomes a Reel. You can also post to your Story.
 - **Stories**: they expire after 24 hours. Tap to move forward or back, hold to pause. Includes seen/unseen rings, a "Seen by" list, replies by DM, and delete.

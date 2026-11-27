@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Camera } from "lucide-react";
 import { api, BASE_PATH } from "@/lib/client";
 import { AuthInput, Divider } from "@/components/auth-form";
 import { Logo } from "@/components/nav";
@@ -16,6 +17,8 @@ export default function SignupPage() {
   const [form, setForm] = useState({ email: "", phone: "", password: "", name: "", lastName: "", username: "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: k === "username" ? v.toLowerCase().replace(/\s/g, "") : v }));
 
   const valid = {
@@ -30,7 +33,10 @@ export default function SignupPage() {
     setBusy(true);
     setError(null);
     try {
-      await api("/api/auth/signup", { body: form });
+      const body = new FormData();
+      Object.entries(form).forEach(([key, value]) => body.append(key, value));
+      if (avatar) body.append("avatar", avatar);
+      await api("/api/auth/signup", { body });
       window.location.replace(`${BASE_PATH}/`);
     } catch (err) {
       setError((err as Error).message);
@@ -52,6 +58,21 @@ export default function SignupPage() {
         </p>
         <Divider />
         <form onSubmit={submit} className="flex flex-col gap-1.5">
+          <label className="mx-auto mb-2 flex cursor-pointer flex-col items-center gap-2 text-xs font-semibold text-link">
+            <span className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-field ring-1 ring-border">
+              {avatarPreview ? <Image src={avatarPreview} alt="Profile preview" width={80} height={80} unoptimized className="h-full w-full object-cover" /> : <Camera size={27} className="text-muted" />}
+            </span>
+            {avatar ? "Change profile photo" : "Add profile photo"}
+            <input hidden type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={(event) => {
+              const file = event.target.files?.[0] ?? null;
+              setAvatar(file);
+              if (!file) { setAvatarPreview(null); return; }
+              const reader = new FileReader();
+              reader.onload = () => setAvatarPreview(typeof reader.result === "string" ? reader.result : null);
+              reader.readAsDataURL(file);
+              event.target.value = "";
+            }} />
+          </label>
           <AuthInput label="Email" value={form.email} onChange={set("email")} type="email" autoComplete="email" valid={valid.email} />
           <AuthInput label="Phone number" value={form.phone} onChange={set("phone")} autoComplete="tel" valid={valid.phone} />
           <AuthInput label="Password" type="password" value={form.password} onChange={set("password")} autoComplete="new-password" valid={valid.password} />
