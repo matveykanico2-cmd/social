@@ -17,6 +17,7 @@ export default function EditProfilePage() {
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushStatus, setPushStatus] = useState<string | null>(null);
+  const [exportBusy, setExportBusy] = useState(false);
   const totp = useApi<{ enabled: boolean; available: boolean }>("/api/auth/totp");
   const [totpPassword, setTotpPassword] = useState("");
   const [totpCode, setTotpCode] = useState("");
@@ -106,6 +107,23 @@ export default function EditProfilePage() {
       setPushStatus("Push notifications enabled.");
     } catch (error) { setPushStatus((error as Error).message); }
     finally { setPushBusy(false); }
+  };
+
+  const exportData = async () => {
+    setExportBusy(true);
+    try {
+      const response = await fetch("/api/me/export");
+      if (!response.ok) throw new Error("Could not export your data.");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `shalter-${me.username}-data.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast("Your data export is ready.");
+    } catch (error) { toast((error as Error).message); }
+    finally { setExportBusy(false); }
   };
 
   const field = (key: keyof typeof form, label: string, help?: string, multiline = false) => (
@@ -205,6 +223,11 @@ export default function EditProfilePage() {
           <p className="mb-3 text-sm text-muted">Get messages, reactions and follows even when shalter is not open.</p>
           <PrimaryButton type="button" onClick={() => void enablePush()} disabled={pushBusy}>{pushBusy ? "Enabling..." : "Enable push notifications"}</PrimaryButton>
           {pushStatus && <p className="mt-2 text-sm text-muted">{pushStatus}</p>}
+        </section>
+        <section className="rounded-2xl border border-border p-4">
+          <h2 className="mb-1 text-base font-bold">Your data</h2>
+          <p className="mb-3 text-sm text-muted">Download a JSON copy of your profile, posts, comments, stories, chats and social connections. Sensitive credentials are never included.</p>
+          <PrimaryButton type="button" onClick={() => void exportData()} disabled={exportBusy}>{exportBusy ? "Preparing export..." : "Download my data"}</PrimaryButton>
         </section>
         <section className="rounded-2xl border border-border p-4">
           <h2 className="mb-1 text-base font-bold">Password and security</h2>

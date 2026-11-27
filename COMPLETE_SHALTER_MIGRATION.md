@@ -31,6 +31,7 @@ Social остаётся единым приложением и единой ба
 | Admin moderation and server status | `/admin` | protected `/api/admin/*`, role migration, audit log | responsive admin panel with user roles | API auth checks + build | Перенесено частично |
 | Push notifications | settings | `/api/push/*`, subscriptions | settings action | build | Перенесено с конфигурацией |
 | TOTP / 2FA | settings/login | `/api/auth/totp`, encrypted secret | setup/challenge UI | unit/API contract | Перенесено |
+| Personal data export | settings | `/api/me/export`, user-owned queries | download JSON action | build | Перенесено |
 
 ## Что нельзя считать полностью перенесённым без инфраструктуры
 
